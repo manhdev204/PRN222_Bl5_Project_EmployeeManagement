@@ -1,4 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using PRN222_BL5_Project_EmployeeManagement.Models;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<Prn222Bl5ProjectEmployeeManagementContext>(
+   options => options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn"))
+);
+builder.Services.AddScoped(typeof(Prn222Bl5ProjectEmployeeManagementContext));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
