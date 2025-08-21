@@ -1,0 +1,66 @@
+﻿@model PRN222_BL5_Project_EmployeeManagement.Models.Attendance
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">Chấm công hôm nay</h3>
+        </div>
+        <div class="card-body">
+            @if (Model == null)
+            {
+                    <div class="alert alert-warning text-center">
+                        Bạn chưa chấm công hôm nay.
+                    </div>
+            }
+            else
+            {
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <b>Ngày:</b> @Model.AttendanceDate
+                        </li>
+                        <li class="list-group-item">
+                            <b>Check-in:</b> 
+                            <span class="badge bg-success">
+                            @(Model.CheckInTime?.ToString("HH:mm") ?? "Chưa check-in")
+                            </span>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Check-out:</b> 
+                            <span class="badge bg-danger">
+                            @(Model.CheckOutTime?.ToString("HH:mm") ?? "Chưa check-out")
+                            </span>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Trạng thái:</b>
+                        @if (Model.Status == 1)
+                        {
+                                    <span class="badge bg-success">Đi làm</span>
+                        }
+                        else if (Model.Status == 2)
+                        {
+                                    <span class="badge bg-warning text-dark">Đi muộn</span>
+                        }
+                        else
+                        {
+                                    <span class="badge bg-secondary">Nghỉ</span>
+                        }
+                        </li>
+                    </ul>
+            }
+        </div>
+        <div class="card-footer text-center">
+            <form asp-action="CheckIn" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success me-2"
+                @(Model?.CheckInTime != null ? "disabled" : "")>
+                    <i class="bi bi-box-arrow-in-right"></i> Check-in
+                </button>
+            </form>
+            <form asp-action="CheckOut" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger"
+                @(Model?.CheckOutTime != null ? "disabled" : "")>
+                    <i class="bi bi-box-arrow-right"></i> Check-out
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
