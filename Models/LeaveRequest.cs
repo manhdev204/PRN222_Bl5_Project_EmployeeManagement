@@ -27,5 +27,9 @@ public partial class LeaveRequest
 
     public bool? DeleteFlag { get; set; }
 
+    public int? ApprovedId { get; set; }
+
     public virtual Account Account { get; set; } = null!;
+
+    public virtual Account? Approved { get; set; }
 }
