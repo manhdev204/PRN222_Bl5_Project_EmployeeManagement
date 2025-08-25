@@ -219,6 +219,9 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_date");
             entity.Property(e => e.CreatedId).HasColumnName("created_id");
+            entity.Property(e => e.Deduction)
+                .HasColumnType("decimal(15, 2)")
+                .HasColumnName("deduction");
             entity.Property(e => e.DeleteFlag)
                 .HasDefaultValue(false)
                 .HasColumnName("delete_flag");
