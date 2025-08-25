@@ -1,10 +1,37 @@
 ﻿@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Salary>
-
+ 
 @{
     ViewData["Title"] = "Salary Management";
 }
+@{
+    // Lấy sort hiện tại từ ViewData
+    string currentSort = ViewData["CurrentSort"]?.ToString() ?? "";
+}
 
 <h2>Salary Management</h2>
+
+<div class="mb-3">
+    <form method="get" asp-action="Index" class="row g-2">
+        <div class="col-md-3">
+            <input type="text" name="search" value="@ViewData["CurrentSearch"]" 
+                   class="form-control" placeholder="Search... (name, salary, bonus, etc)" />
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="startDate" value="@ViewData["StartDate"]" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="endDate" value="@ViewData["EndDate"]" class="form-control" />
+        </div>
+         
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+        <div class="col-md-1">
+            <a asp-action="Index" class="btn btn-secondary w-100">Reset</a>
+        </div>
+    </form>
+</div>
+
 
 <p>
     <a asp-action="Create" class="btn btn-primary">Create Salary</a>
@@ -13,12 +40,62 @@
 <table class="table table-striped table-bordered">
     <thead>
         <tr>
-            <th>Employee</th>
-            <th>Base Salary</th>
-            <th>Bonus</th>
-            <th>Deduction</th>
-            <th>Total Salary</th>
-            <th>Created Date</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(currentSort == "name_asc" ? "name_desc" : "name_asc")"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-startDate="@ViewData["StartDate"]"
+                   asp-route-endDate="@ViewData["EndDate"]">
+                    Employee @(currentSort == "name_asc" ? "↑" : "↓" )
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(currentSort == "salary_asc" ? "salary_desc" : "salary_asc")"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-startDate="@ViewData["StartDate"]"
+                   asp-route-endDate="@ViewData["EndDate"]">
+                    Base Salary @(currentSort == "salary_asc" ? "↑" : "↓")
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(currentSort == "bonus_asc" ? "bonus_desc" : "bonus_asc")"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-startDate="@ViewData["StartDate"]"
+                   asp-route-endDate="@ViewData["EndDate"]">
+                    Bonus  @(currentSort == "bonus_asc" ? "↑" : "↓")
+
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(currentSort == "deduction_asc" ? "deduction_desc" : "deduction_asc")"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-startDate="@ViewData["StartDate"]"
+                   asp-route-endDate="@ViewData["EndDate"]">
+                    Deduction @(currentSort == "deduction_asc" ? "↑" : "↓")
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(currentSort == "date_asc" ? "date_desc" : "date_asc")"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-startDate="@ViewData["StartDate"]"
+                   asp-route-endDate="@ViewData["EndDate"]">
+                    Created Date @(currentSort == "date_asc" ? "↑" : "↓")
+
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(currentSort == "total_asc" ? "total_desc" : "total_asc")"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-startDate="@ViewData["StartDate"]"
+                   asp-route-endDate="@ViewData["EndDate"]">
+                    Total Salary @(currentSort == "total_asc" ? "↑" : "↓")
+                 </a>
+            </th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -28,14 +105,11 @@
             <tr>
                 <td>@item.Account?.FullName</td>
                 <td>@item.BaseSalary.ToString("N0") VND</td>
-                <td>
-                    @(item.Bonus?.ToString("N0") ?? "0") VND
-                </td>
-                <td>
-                    @(item.Deduction?.ToString("N0") ?? "0") VND
-                </td>
-                <td>@item.TotalSalary?.ToString("N0") VND</td>
+                <td>@(item.Bonus?.ToString("N0") ?? "0") VND</td>
+                <td>@(item.Deduction?.ToString("N0") ?? "0") VND</td>
                 <td>@item.CreatedDate?.ToString("dd/MM/yyyy")</td>
+                <td>@item.TotalSalary?.ToString("N0") VND</td>
+               
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.SalaryId" class="btn btn-warning btn-sm">Edit</a>
                     <a asp-action="Delete" asp-route-id="@item.SalaryId" class="btn btn-danger btn-sm">Delete</a>
