@@ -1,0 +1,47 @@
+﻿@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.LeaveRequest>
+@{
+    ViewData["Title"] = "Đơn của tôi";
+    Func<int, string> statusText = s => s == 1 ? "Pending" : s == 2 ? "Approved" : "Rejected";
+    Func<int, string> statusBadge = s => s == 1 ? "bg-warning text-dark" : s == 2 ? "bg-success" : "bg-danger";
+}
+<div class="container mt-4">
+    <h3>Đơn nghỉ của tôi</h3>
+    @if (TempData["Success"] != null)
+    {
+            <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Period</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Date Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var i = 0;
+                    foreach (var r in Model)
+                    {
+                        i++;
+                            <tr>
+                                <td>@i</td>
+                                <td>@r.StartDate.ToString("dd/MM/yyyy") - @r.EndDate.ToString("dd/MM/yyyy")</td>
+                                <td>@r.LeaveReason</td>
+                                <td><span class="badge @statusBadge(r.Status)">@statusText(r.Status)</span></td>
+                                <td>@r.CreatedDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                    }
+                    if (!Model.Any())
+                    {
+                            <tr><td colspan="5" class="text-center text-muted">No request yet.</td></tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="Create" asp-controller="LeaveRequest">Create new request</a>
+</div>

@@ -26,10 +26,10 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 		}
 
 		/// <summary>
-		/// Yêu cầu đang đăng nhập và role ∈ {Manager, Admin}.
-		/// - Chưa login: redirect /Authentication/Login?returnUrl=...
-		/// - Login nhưng sai role: trả 403 + TempData lỗi.
-		/// Trả về (userId, roleId) khi hợp lệ; ngược lại trả IActionResult để caller return luôn.
+		/// Requires login and role ∈ {Manager, Admin}.
+		/// - Not logged in: redirect to /Authentication/Login?returnUrl=...
+		/// - Logged in with wrong role: return 403 + TempData error.
+		/// Returns (userId, roleId) if valid; otherwise returns IActionResult for caller to return immediately.
 		/// </summary>
 		private (int userId, int roleId)? RequireManagerOrAdmin(out IActionResult? failResult)
 		{
@@ -47,8 +47,8 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 			var roleStr = HttpContext.Session.GetString(SessionKeyRole);
 			if (!int.TryParse(roleStr, out var roleId) || (roleId != ROLE_MANAGER && roleId != ROLE_ADMIN))
 			{
-				TempData["Error"] = "Bạn không có quyền truy cập màn hình này.";
-				failResult = StatusCode(403); 
+				TempData["Error"] = "You do not have permission to access this screen.";
+				failResult = StatusCode(403);
 				return null;
 			}
 
@@ -104,7 +104,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 				.ToDictionary(t => t.AccountId, t => t);
 
 			var leaveToday = _context.LeaveRequests
-				.Where(l => l.Status == 1 && accIds.Contains(l.AccountId)
+				.Where(l => l.Status == 2 && accIds.Contains(l.AccountId)
 							&& l.StartDate <= theDay && l.EndDate >= theDay)
 				.Select(l => new { l.AccountId })
 				.Distinct()
@@ -130,29 +130,29 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
 				if (onLeave)
 				{
-					row.StatusText = "Nghỉ phép";
+					row.StatusText = "On Leave";
 					row.StatusBadge = "bg-info text-dark";
 				}
 				else if (att == null || att.CheckInTime == null)
 				{
-					row.StatusText = "Chưa check-in";
+					row.StatusText = "Not checked in";
 					row.StatusBadge = "bg-secondary";
 				}
 				else
 				{
 					if (att.Status == 2)
 					{
-						row.StatusText = att.CheckOutTime == null ? "Đi muộn (đang làm)" : "Đi muộn";
+						row.StatusText = att.CheckOutTime == null ? "Late (working)" : "Late";
 						row.StatusBadge = "bg-warning text-dark";
 					}
 					else if (att.Status == 1)
 					{
-						row.StatusText = att.CheckOutTime == null ? "Đi làm (đang làm)" : "Đi làm";
+						row.StatusText = att.CheckOutTime == null ? "Present (working)" : "Present";
 						row.StatusBadge = "bg-success";
 					}
 					else
 					{
-						row.StatusText = "Nghỉ";
+						row.StatusText = "Absent";
 						row.StatusBadge = "bg-secondary";
 					}
 				}
@@ -194,7 +194,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 			{
 				if (att.CheckInTime != null)
 				{
-					TempData["Error"] = "Nhân viên đã check-in, không thể đánh dấu vắng.";
+					TempData["Error"] = "Employee already checked in. Cannot mark absent.";
 					return RedirectToAction(nameof(Today), new { date, departmentId = (int?)null });
 				}
 
@@ -204,7 +204,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 			}
 
 			_context.SaveChanges();
-			TempData["Success"] = excused ? "Đã đánh dấu vắng có lý do." : "Đã đánh dấu vắng không lý do.";
+			TempData["Success"] = excused ? "Marked as excused absence." : "Marked as unexcused absence.";
 			return RedirectToAction(nameof(Today), new { date });
 		}
 	}

@@ -1,0 +1,92 @@
+﻿@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.LeaveRequest>
+@{
+    ViewData["Title"] = "Approve Leave Requests";
+    Func<int, string> statusText = s => s == 1 ? "Pending" : s == 2 ? "Approved" : "Rejected";
+    Func<int, string> statusBadge = s => s == 1 ? "bg-warning text-dark" : s == 2 ? "bg-success" : "bg-danger";
+}
+<div class="container mt-4">
+    <h3>Approve Leave Requests</h3>
+    @if (TempData["Success"] != null)
+    {
+                <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status">
+                <option value="">All</option>
+                <option value="1" selected="@(ViewBag.Status == 1 ? "selected" : null)">Pending</option>
+                <option value="2" selected="@(ViewBag.Status == 2 ? "selected" : null)">Approved</option>
+                <option value="3" selected="@(ViewBag.Status == 3 ? "selected" : null)">Rejected</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">From</label>
+            <input class="form-control" type="date" name="from" value="@((ViewBag.From is DateOnly fo) ? fo.ToString("yyyy-MM-dd") : "")" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">To</label>
+            <input class="form-control" type="date" name="to" value="@((ViewBag.To is DateOnly to) ? to.ToString("yyyy-MM-dd") : "")" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Search</label>
+            <input class="form-control" name="q" value="@(ViewBag.Q ?? "")" placeholder="Name, username, reason" />
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-primary w-100" type="submit">Filter</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Leave Period</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var i = 0;
+                    foreach (var r in Model)
+                    {
+                        i++;
+                                    <tr>
+                                        <td>@i</td>
+                                        <td>@(r.Account?.FullName ?? r.Account?.Username)</td>
+                                        <td>@r.StartDate.ToString("dd/MM/yyyy") - @r.EndDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.LeaveReason</td>
+                                        <td><span class="badge @statusBadge(r.Status)">@statusText(r.Status)</span></td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <form method="post" asp-action="Approve" asp-controller="LeaveRequest">
+                                        @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@r.LeaveRequestId" />
+                                                    <button class="btn btn-success btn-sm" type="submit" @(r.Status != 1 ? "disabled" : null)>Approve</button>
+                                                </form>
+                                                <form method="post" asp-action="Reject" asp-controller="LeaveRequest" class="ms-1">
+                                        @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@r.LeaveRequestId" />
+                                                    <button class="btn btn-danger btn-sm" type="submit" @(r.Status != 1 ? "disabled" : null)>Reject</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                    }
+                    if (!Model.Any())
+                    {
+                                    <tr><td colspan="6" class="text-center text-muted">No data available.</td></tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -33,31 +33,31 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 			return uid.Value;
 		}
 
-		public IActionResult Index()
-		{
-			var accountId = TryGetSessionAccountIdOrRedirect();
-			if (!accountId.HasValue) return new EmptyResult(); 
+        public IActionResult Index()
+        {
+            var accountId = TryGetSessionAccountIdOrRedirect();
+            if (!accountId.HasValue) return new EmptyResult();
 
-			var today = DateOnly.FromDateTime(DateTime.Today);
+            var today = DateOnly.FromDateTime(DateTime.Today);
 
-			var attendance = _context.Attendances
-				.FirstOrDefault(a => a.AccountId == accountId.Value && a.AttendanceDate == today);
+            var attendance = _context.Attendances
+                .FirstOrDefault(a => a.AccountId == accountId.Value && a.AttendanceDate == today);
 
-			if (attendance == null && IsOnLeaveToday(accountId.Value, today))
-			{
-				attendance = new Attendance
-				{
-					AccountId = accountId.Value,
-					AttendanceDate = today,
-					Status = 0,
-					OnLeave = 1
-				};
-			}
+            if (attendance == null && IsOnLeaveToday(accountId.Value, today))
+            {
+                attendance = new Attendance
+                {
+                    AccountId = accountId.Value,
+                    AttendanceDate = today,
+                    Status = 0,
+                    OnLeave = 1
+                };
+            }
 
-			return View(attendance);
-		}
+            return View(attendance);
+        }
 
-		[HttpPost]
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public IActionResult CheckIn()
 		{
