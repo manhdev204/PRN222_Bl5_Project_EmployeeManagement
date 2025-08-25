@@ -10,10 +10,21 @@
     <div class="form-group">
         <label>Base Salary</label>
         <input asp-for="BaseSalary" class="form-control" />
+        <span asp-validation-for="BaseSalary" class="text-danger"></span>
+
+
     </div>
     <div class="form-group">
         <label>Bonus</label>
         <input asp-for="Bonus" class="form-control" />
+        <span asp-validation-for="Bonus" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <label>Deduction</label>
+        <input asp-for="Deduction" class="form-control" />
+        <span asp-validation-for="Deduction" class="text-danger"></span>
+
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
     <a asp-action="Index" class="btn btn-secondary">Back</a>

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<dynamic>
+﻿@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Salary>
 
 @{
     ViewData["Title"] = "Salary Management";
@@ -16,6 +16,7 @@
             <th>Employee</th>
             <th>Base Salary</th>
             <th>Bonus</th>
+            <th>Deduction</th>
             <th>Total Salary</th>
             <th>Created Date</th>
             <th>Actions</th>
@@ -25,10 +26,15 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Account.FullName</td>
-                <td>@item.BaseSalary</td>
-                <td>@item.Bonus</td>
-                <td>@item.TotalSalary</td>
+                <td>@item.Account?.FullName</td>
+                <td>@item.BaseSalary.ToString("N0") VND</td>
+                <td>
+                    @(item.Bonus?.ToString("N0") ?? "0") VND
+                </td>
+                <td>
+                    @(item.Deduction?.ToString("N0") ?? "0") VND
+                </td>
+                <td>@item.TotalSalary?.ToString("N0") VND</td>
                 <td>@item.CreatedDate?.ToString("dd/MM/yyyy")</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.SalaryId" class="btn btn-warning btn-sm">Edit</a>

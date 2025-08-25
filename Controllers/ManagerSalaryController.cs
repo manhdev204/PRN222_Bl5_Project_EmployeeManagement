@@ -14,6 +14,11 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             _context = context;
         }
 
+        public IActionResult Home()
+        {
+            return View();
+        }
+
         // List salary
         public IActionResult Index()
         {
@@ -27,7 +32,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         // GET: Create
         public IActionResult Create()
         {
-        
+
             ViewBag.Accounts = new SelectList(_context.Accounts
                                                         .Where(a => a.RoleId == 3 && (a.DeleteFlag == false || a.DeleteFlag == null))
                                                         .Select(a => new { a.AccountId, a.FullName })
@@ -42,10 +47,11 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                salary.TotalSalary = salary.BaseSalary + (salary.Bonus ?? 0);
+                salary.TotalSalary = salary.BaseSalary + (salary.Bonus ?? 0) - (salary.Deduction ?? 0);
                 salary.CreatedDate = DateTime.Now;
                 salary.CreatedId = 1; // TODO: Lấy từ user đăng nhập (manager)
                 salary.Account = _context.Accounts.First(a => a.AccountId == salary.AccountId);
+                 
                 _context.Salaries.Add(salary);
                 _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
@@ -55,7 +61,6 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
                                                   .Where(a => a.RoleId == 3 && (a.DeleteFlag == false || a.DeleteFlag == null))
                                                   .Select(a => new { a.AccountId, a.FullName })
                                                   .ToList(), "AccountId", "FullName", salary.AccountId);
-
             return View(salary);
         }
 
@@ -76,10 +81,10 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             {
                 var existing = _context.Salaries.Find(salary.SalaryId);
                 if (existing == null) return NotFound();
-
                 existing.BaseSalary = salary.BaseSalary;
                 existing.Bonus = salary.Bonus;
-                existing.TotalSalary = salary.BaseSalary + (salary.Bonus ?? 0);
+                existing.Deduction = salary.Deduction;
+                existing.TotalSalary = salary.BaseSalary + (salary.Bonus ?? 0) - (salary.Deduction ?? 0);
                 existing.LastUpdatedDate = DateTime.Now;
                 existing.LastUpdatedId = 1; // TODO: lấy từ manager login
 

@@ -4,9 +4,9 @@
     ViewData["Title"] = "Employee Salary";
 }
 
-<h2>Salary Management</h2>
+<h2>Salary</h2>
 
- 
+
 
 <table class="table table-striped table-bordered">
     <thead>
@@ -14,21 +14,28 @@
             <th>Employee</th>
             <th>Base Salary</th>
             <th>Bonus</th>
+            <th>Deduction</th>
             <th>Total Salary</th>
             <th>Created Date</th>
-          
+
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Account.FullName</td>
-                <td>@item.BaseSalary</td>
-                <td>@item.Bonus</td>
-                <td>@item.TotalSalary</td>
+                <td>@item.Account?.FullName</td>
+                <td>
+                    @item.BaseSalary.ToString("N0") VND
+                </td>
+                <td>
+                    @(item.Bonus?.ToString("N0") ?? "0") VND
+                </td>
+                <td>
+                    @(item.Deduction?.ToString("N0") ?? "0") VND
+                </td>
+                <td>@item.TotalSalary?.ToString("N0") VND</td>
                 <td>@item.CreatedDate?.ToString("dd/MM/yyyy")</td>
-                
             </tr>
         }
     </tbody>
