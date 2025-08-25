@@ -1,156 +1,176 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using PRN222_BL5_Project_EmployeeManagement.Models;
 using System;
 using System.Linq;
 
 namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 {
-    public class AttendanceController : Controller
-    {
-        private readonly Prn222Bl5ProjectEmployeeManagementContext _context;
+	public class AttendanceController : Controller
+	{
+		private readonly Prn222Bl5ProjectEmployeeManagementContext _context;
 
-        private static readonly TimeSpan WorkStart = new TimeSpan(9, 0, 0);   // 09:00
-        private const int LateGraceMinutes = 15;                               // cho phép muộn 15'
-        // TODO: thay bằng lấy từ session/claims
-        private int GetCurrentAccountId() => 1;
+		private const string SessionKeyUserId = "AUTH_USER_ID";
+		private const string SessionKeyRole = "AUTH_ROLE";
 
-        public AttendanceController(Prn222Bl5ProjectEmployeeManagementContext context)
-        {
-            _context = context;
-        }
+		private static readonly TimeSpan WorkStart = new TimeSpan(9, 0, 0);   // 09:00
+		private const int LateGraceMinutes = 15;                               // cho phép muộn 15'
 
-        // Trang hôm nay
-        public IActionResult Index()
-        {
-            int accountId = GetCurrentAccountId();
-            var today = DateOnly.FromDateTime(DateTime.Today);
+		public AttendanceController(Prn222Bl5ProjectEmployeeManagementContext context)
+		{
+			_context = context;
+		}
 
-            var attendance = _context.Attendances
-                .FirstOrDefault(a => a.AccountId == accountId && a.AttendanceDate == today);
+		private int? TryGetSessionAccountIdOrRedirect()
+		{
+			var uid = HttpContext.Session.GetInt32(SessionKeyUserId);
+			if (!uid.HasValue)
+			{
+				var returnUrl = HttpContext.Request.Path + HttpContext.Request.QueryString;
+				Response.Redirect(Url.Action("Login", "Authentication", new { returnUrl })!);
+				return null;
+			}
+			return uid.Value;
+		}
 
-            if (attendance == null && IsOnLeaveToday(accountId, today))
-            {
-                attendance = new Attendance
-                {
-                    AccountId = accountId,
-                    AttendanceDate = today,
-                    Status = 0,     
-                    OnLeave = 1
-                };
-            }
+		public IActionResult Index()
+		{
+			var accountId = TryGetSessionAccountIdOrRedirect();
+			if (!accountId.HasValue) return new EmptyResult(); 
 
-            return View(attendance);
-        }
+			var today = DateOnly.FromDateTime(DateTime.Today);
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CheckIn()
-        {
-            int accountId = GetCurrentAccountId();
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var now = DateTime.Now;
+			var attendance = _context.Attendances
+				.FirstOrDefault(a => a.AccountId == accountId.Value && a.AttendanceDate == today);
 
-            if (IsOnLeaveToday(accountId, today))
-            {
-                TempData["Error"] = "Hôm nay bạn đang trong kỳ nghỉ đã duyệt, không thể check-in.";
-                return RedirectToAction(nameof(Index));
-            }
+			if (attendance == null && IsOnLeaveToday(accountId.Value, today))
+			{
+				attendance = new Attendance
+				{
+					AccountId = accountId.Value,
+					AttendanceDate = today,
+					Status = 0,
+					OnLeave = 1
+				};
+			}
 
-            var attendance = _context.Attendances
-                .FirstOrDefault(a => a.AccountId == accountId && a.AttendanceDate == today);
+			return View(attendance);
+		}
 
-            // Tính muộn theo giờ chuẩn + grace
-            var workStartToday = now.Date + WorkStart;
-            bool isLate = now > workStartToday.AddMinutes(LateGraceMinutes);
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult CheckIn()
+		{
+			var accountId = TryGetSessionAccountIdOrRedirect();
+			if (!accountId.HasValue) return new EmptyResult();
 
-            if (attendance == null)
-            {
-                attendance = new Attendance
-                {
-                    AccountId = accountId,
-                    AttendanceDate = today,
-                    CheckInTime = now,
-                    Status = isLate ? 2 : 1,  // 1 present, 2 late
-                    OnLeave = 0,
-                    CreatedDate = now
-                };
-                _context.Attendances.Add(attendance);
-                _context.SaveChanges();
-                TempData["Success"] = $"Check-in lúc {now:HH:mm}.";
-                return RedirectToAction(nameof(Index));
-            }
+			var today = DateOnly.FromDateTime(DateTime.Today);
+			var now = DateTime.Now;
 
-            if (attendance.OnLeave == 1)
-            {
-                TempData["Error"] = "Bản ghi hôm nay là ngày nghỉ, không thể check-in.";
-                return RedirectToAction(nameof(Index));
-            }
+			if (IsOnLeaveToday(accountId.Value, today))
+			{
+				TempData["Error"] = "Hôm nay bạn đang trong kỳ nghỉ đã duyệt, không thể check-in.";
+				return RedirectToAction(nameof(Index));
+			}
 
-            if (attendance.CheckInTime != null)
-            {
-                TempData["Error"] = $"Bạn đã check-in lúc {attendance.CheckInTime:HH:mm}.";
-                return RedirectToAction(nameof(Index));
-            }
+			var attendance = _context.Attendances
+				.FirstOrDefault(a => a.AccountId == accountId.Value && a.AttendanceDate == today);
 
-            attendance.CheckInTime = now;
-            attendance.Status = isLate ? 2 : 1;
-            attendance.LastUpdatedDate = now;
-            _context.SaveChanges();
+			// Tính muộn theo giờ chuẩn + grace
+			var workStartToday = now.Date + WorkStart;
+			bool isLate = now > workStartToday.AddMinutes(LateGraceMinutes);
 
-            TempData["Success"] = $"Check-in lúc {now:HH:mm}.";
-            return RedirectToAction(nameof(Index));
-        }
+			if (attendance == null)
+			{
+				attendance = new Attendance
+				{
+					AccountId = accountId.Value,
+					AttendanceDate = today,
+					CheckInTime = now,
+					Status = isLate ? 2 : 1,  // 1 present, 2 late
+					OnLeave = 0,
+					CreatedDate = now
+				};
+				_context.Attendances.Add(attendance);
+				_context.SaveChanges();
+				TempData["Success"] = $"Check-in lúc {now:HH:mm}.";
+				return RedirectToAction(nameof(Index));
+			}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CheckOut()
-        {
-            int accountId = GetCurrentAccountId();
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var now = DateTime.Now;
+			if (attendance.OnLeave == 1)
+			{
+				TempData["Error"] = "Bản ghi hôm nay là ngày nghỉ, không thể check-in.";
+				return RedirectToAction(nameof(Index));
+			}
 
-            var attendance = _context.Attendances
-                .FirstOrDefault(a => a.AccountId == accountId && a.AttendanceDate == today);
+			if (attendance.CheckInTime != null)
+			{
+				TempData["Error"] = $"Bạn đã check-in lúc {attendance.CheckInTime:HH:mm}.";
+				return RedirectToAction(nameof(Index));
+			}
 
-            if (attendance == null || attendance.CheckInTime == null)
-            {
-                TempData["Error"] = "Bạn chưa check-in hôm nay.";
-                return RedirectToAction(nameof(Index));
-            }
+			attendance.CheckInTime = now;
+			attendance.Status = isLate ? 2 : 1;
+			attendance.LastUpdatedDate = now;
+			_context.SaveChanges();
 
-            if (attendance.OnLeave == 1)
-            {
-                TempData["Error"] = "Hôm nay là ngày nghỉ, không thể check-out.";
-                return RedirectToAction(nameof(Index));
-            }
+			TempData["Success"] = $"Check-in lúc {now:HH:mm}.";
+			return RedirectToAction(nameof(Index));
+		}
 
-            if (attendance.CheckOutTime != null)
-            {
-                TempData["Error"] = $"Bạn đã check-out lúc {attendance.CheckOutTime:HH:mm}.";
-                return RedirectToAction(nameof(Index));
-            }
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult CheckOut()
+		{
+			var accountId = TryGetSessionAccountIdOrRedirect();
+			if (!accountId.HasValue) return new EmptyResult();
 
-            if (now < attendance.CheckInTime)
-            {
-                TempData["Error"] = "Thời gian check-out không hợp lệ.";
-                return RedirectToAction(nameof(Index));
-            }
+			var today = DateOnly.FromDateTime(DateTime.Today);
+			var now = DateTime.Now;
 
-            attendance.CheckOutTime = now;
-            attendance.LastUpdatedDate = now;
-            _context.SaveChanges();
+			var attendance = _context.Attendances
+				.FirstOrDefault(a => a.AccountId == accountId.Value && a.AttendanceDate == today);
 
-            TempData["Success"] = $"Check-out lúc {now:HH:mm}.";
-            return RedirectToAction(nameof(Index));
-        }
-        private bool IsOnLeaveToday(int accountId, DateOnly day)
-        {
-            return _context.LeaveRequests.Any(l =>
-                l.AccountId == accountId &&
-                l.Status == 1 &&                        
-                l.StartDate <= day &&
-                l.EndDate >= day
-            );
-        }
-    }
+			if (attendance == null || attendance.CheckInTime == null)
+			{
+				TempData["Error"] = "Bạn chưa check-in hôm nay.";
+				return RedirectToAction(nameof(Index));
+			}
+
+			if (attendance.OnLeave == 1)
+			{
+				TempData["Error"] = "Hôm nay là ngày nghỉ, không thể check-out.";
+				return RedirectToAction(nameof(Index));
+			}
+
+			if (attendance.CheckOutTime != null)
+			{
+				TempData["Error"] = $"Bạn đã check-out lúc {attendance.CheckOutTime:HH:mm}.";
+				return RedirectToAction(nameof(Index));
+			}
+
+			if (now < attendance.CheckInTime)
+			{
+				TempData["Error"] = "Thời gian check-out không hợp lệ.";
+				return RedirectToAction(nameof(Index));
+			}
+
+			attendance.CheckOutTime = now;
+			attendance.LastUpdatedDate = now;
+			_context.SaveChanges();
+
+			TempData["Success"] = $"Check-out lúc {now:HH:mm}.";
+			return RedirectToAction(nameof(Index));
+		}
+
+		private bool IsOnLeaveToday(int accountId, DateOnly day)
+		{
+			return _context.LeaveRequests.Any(l =>
+				l.AccountId == accountId &&
+				l.Status == 1 &&
+				l.StartDate <= day &&
+				l.EndDate >= day
+			);
+		}
+	}
 }

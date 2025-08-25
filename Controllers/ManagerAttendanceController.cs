@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Http;
 using PRN222_BL5_Project_EmployeeManagement.Models;
 using PRN222_BL5_Project_EmployeeManagement.Models.ViewModels;
 using System;
@@ -11,19 +11,56 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 	{
 		private readonly Prn222Bl5ProjectEmployeeManagementContext _context;
 
-		// cấu hình giờ vào + grace
+		private const string SessionKeyUserId = "AUTH_USER_ID";
+		private const string SessionKeyRole = "AUTH_ROLE";
+
+		private const int ROLE_MANAGER = 2;
+		private const int ROLE_ADMIN = 3;
+
 		private static readonly TimeSpan WorkStart = new TimeSpan(9, 0, 0);
 		private const int LateGraceMinutes = 15;
-		private int GetCurrentAccountId() => 1; // nếu cần phân quyền, thay bằng claims/session
 
 		public ManagerAttendanceController(Prn222Bl5ProjectEmployeeManagementContext context)
 		{
 			_context = context;
 		}
 
+		/// <summary>
+		/// Yêu cầu đang đăng nhập và role ∈ {Manager, Admin}.
+		/// - Chưa login: redirect /Authentication/Login?returnUrl=...
+		/// - Login nhưng sai role: trả 403 + TempData lỗi.
+		/// Trả về (userId, roleId) khi hợp lệ; ngược lại trả IActionResult để caller return luôn.
+		/// </summary>
+		private (int userId, int roleId)? RequireManagerOrAdmin(out IActionResult? failResult)
+		{
+			failResult = null;
+
+			var uid = HttpContext.Session.GetInt32(SessionKeyUserId);
+			if (!uid.HasValue)
+			{
+				var returnUrl = Url.Action("Today", "ManagerAttendance",
+					new { date = Request.Query["date"].ToString(), departmentId = Request.Query["departmentId"].ToString(), q = Request.Query["q"].ToString() });
+				failResult = RedirectToAction("Login", "Authentication", new { returnUrl });
+				return null;
+			}
+
+			var roleStr = HttpContext.Session.GetString(SessionKeyRole);
+			if (!int.TryParse(roleStr, out var roleId) || (roleId != ROLE_MANAGER && roleId != ROLE_ADMIN))
+			{
+				TempData["Error"] = "Bạn không có quyền truy cập màn hình này.";
+				failResult = StatusCode(403); 
+				return null;
+			}
+
+			return (uid.Value, roleId);
+		}
+
 		[HttpGet]
 		public IActionResult Today(DateOnly? date, int? departmentId, string? q)
 		{
+			var auth = RequireManagerOrAdmin(out var fail);
+			if (auth == null) return fail!;
+
 			var theDay = date ?? DateOnly.FromDateTime(DateTime.Today);
 			var vm = new ManagerAttendanceVm
 			{
@@ -32,14 +69,12 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 				Search = q
 			};
 
-			// danh sách phòng ban cho dropdown
 			vm.Departments = _context.Departments
 				.Where(d => d.DeleteFlag == null || d.DeleteFlag == false)
 				.OrderBy(d => d.DepartmentName)
 				.Select(d => new ValueTuple<int, string>(d.DepartmentId, d.DepartmentName))
 				.ToList();
 
-			// lấy danh sách account theo filter
 			var accountsQuery = _context.Accounts
 				.Where(a => a.DeleteFlag == null || a.DeleteFlag == false);
 
@@ -63,13 +98,11 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
 			var accIds = accounts.Select(a => a.AccountId).ToList();
 
-			// attendance trong ngày
 			var todayAtt = _context.Attendances
 				.Where(t => t.AttendanceDate == theDay && accIds.Contains(t.AccountId))
 				.ToList()
 				.ToDictionary(t => t.AccountId, t => t);
 
-			// nghỉ phép đã duyệt trong ngày
 			var leaveToday = _context.LeaveRequests
 				.Where(l => l.Status == 1 && accIds.Contains(l.AccountId)
 							&& l.StartDate <= theDay && l.EndDate >= theDay)
@@ -95,41 +128,32 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 					HasAttendance = att != null
 				};
 
-				// xác định text/badge
 				if (onLeave)
 				{
 					row.StatusText = "Nghỉ phép";
 					row.StatusBadge = "bg-info text-dark";
 				}
-				else if (att == null)
+				else if (att == null || att.CheckInTime == null)
 				{
 					row.StatusText = "Chưa check-in";
 					row.StatusBadge = "bg-secondary";
 				}
 				else
 				{
-					if (att.CheckInTime == null)
+					if (att.Status == 2)
 					{
-						row.StatusText = "Chưa check-in";
-						row.StatusBadge = "bg-secondary";
+						row.StatusText = att.CheckOutTime == null ? "Đi muộn (đang làm)" : "Đi muộn";
+						row.StatusBadge = "bg-warning text-dark";
+					}
+					else if (att.Status == 1)
+					{
+						row.StatusText = att.CheckOutTime == null ? "Đi làm (đang làm)" : "Đi làm";
+						row.StatusBadge = "bg-success";
 					}
 					else
 					{
-						if (att.Status == 2)
-						{
-							row.StatusText = att.CheckOutTime == null ? "Đi muộn (đang làm)" : "Đi muộn";
-							row.StatusBadge = "bg-warning text-dark";
-						}
-						else if (att.Status == 1)
-						{
-							row.StatusText = att.CheckOutTime == null ? "Đi làm (đang làm)" : "Đi làm";
-							row.StatusBadge = "bg-success";
-						}
-						else
-						{
-							row.StatusText = "Nghỉ";
-							row.StatusBadge = "bg-secondary";
-						}
+						row.StatusText = "Nghỉ";
+						row.StatusBadge = "bg-secondary";
 					}
 				}
 
@@ -144,11 +168,13 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 			return View(vm);
 		}
 
-		// quick action: đánh dấu vắng (có/không lý do)
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public IActionResult MarkAbsent(int accountId, DateOnly date, bool excused)
 		{
+			var auth = RequireManagerOrAdmin(out var fail);
+			if (auth == null) return fail!;
+
 			var att = _context.Attendances
 				.FirstOrDefault(a => a.AccountId == accountId && a.AttendanceDate == date);
 
@@ -166,7 +192,6 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 			}
 			else
 			{
-				// nếu đã có check-in thì không đổi sang vắng
 				if (att.CheckInTime != null)
 				{
 					TempData["Error"] = "Nhân viên đã check-in, không thể đánh dấu vắng.";
