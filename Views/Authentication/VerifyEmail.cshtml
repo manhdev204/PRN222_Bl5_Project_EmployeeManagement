@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Verify Email";
+    var code = ViewBag.Code as string;
+}
+<h2>Verify Email</h2>
+<p>Enter the verification code. For demo, your code is: <strong>@code</strong></p>
+<form method="post" asp-action="VerifyEmail" asp-controller="Authentication">
+    <input type="hidden" name="id" value="@ViewBag.AccountId" />
+    <div class="mb-3">
+        <label class="form-label">Verification Code</label>
+        <input class="form-control" type="text" name="code" />
+    </div>
+    <div class="text-danger">@ViewBag.Error</div>
+    <button class="btn btn-primary" type="submit">Verify</button>
+</form>
+
+
