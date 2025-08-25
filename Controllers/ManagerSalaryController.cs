@@ -78,7 +78,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         {
 
             ViewBag.Accounts = new SelectList(_context.Accounts
-                                                        .Where(a => a.RoleId == 3 && (a.DeleteFlag == false || a.DeleteFlag == null))
+                                                        .Where(a => a.RoleId == 1 && (a.DeleteFlag == false || a.DeleteFlag == null))
                                                         .Select(a => new { a.AccountId, a.FullName })
                                                         .ToList(), "AccountId", "FullName");
             return View();
@@ -107,7 +107,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             }
 
             ViewBag.Accounts = new SelectList(_context.Accounts
-                                                  .Where(a => a.RoleId == 3 && (a.DeleteFlag == false || a.DeleteFlag == null))
+                                                  .Where(a => a.RoleId == 1 && (a.DeleteFlag == false || a.DeleteFlag == null))
                                                   .Select(a => new { a.AccountId, a.FullName })
                                                   .ToList(), "AccountId", "FullName", salary.AccountId);
             return View(salary);
