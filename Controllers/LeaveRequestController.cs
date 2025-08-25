@@ -68,12 +68,12 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
             if (endDate < startDate)
             {
-                ViewBag.Error = "Ngày kết thúc phải sau ngày bắt đầu.";
+                ViewBag.Error = "End date must be after start date.";
                 return View();
             }
             if (string.IsNullOrWhiteSpace(leaveReason))
             {
-                ViewBag.Error = "Vui lòng nhập lý do.";
+                ViewBag.Error = "Please include reason for request.";
                 return View();
             }
 
@@ -90,7 +90,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             _db.LeaveRequests.Add(req);
             _db.SaveChanges();
 
-            TempData["Success"] = "Đã gửi đơn nghỉ.";
+            TempData["Success"] = "Request sent.";
             return RedirectToAction(nameof(MyRequests));
         }
 
@@ -159,14 +159,14 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             if (req == null) return RedirectToAction(nameof(ApproveList));
             if (req.Status != 1)
             {
-                TempData["Error"] = "Chỉ xử lý đơn đang chờ.";
+                TempData["Error"] = "Only process pending requests.";
                 return RedirectToAction(nameof(ApproveList), new { status = 1 });
             }
             req.Status = 2;
             req.LastUpdatedDate = DateTime.Now;
             req.ApprovedId = approverId;
             _db.SaveChanges();
-            TempData["Success"] = "Đã duyệt đơn.";
+            TempData["Success"] = "Approved the request.";
             return RedirectToAction(nameof(ApproveList), new { status = 1 });
         }
 
@@ -182,14 +182,14 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             if (req == null) return RedirectToAction(nameof(ApproveList));
             if (req.Status != 1)
             {
-                TempData["Error"] = "Chỉ xử lý đơn đang chờ.";
+                TempData["Error"] = "Only process pending requests.";
                 return RedirectToAction(nameof(ApproveList), new { status = 1 });
             }
             req.Status = 3;
             req.LastUpdatedDate = DateTime.Now;
             req.ApprovedId = approverId;
             _db.SaveChanges();
-            TempData["Success"] = "Đã từ chối đơn.";
+            TempData["Success"] = "Rejected the request.";
             return RedirectToAction(nameof(ApproveList), new { status = 1 });
         }
     }
