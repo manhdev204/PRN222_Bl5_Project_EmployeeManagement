@@ -1,0 +1,45 @@
+@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Account>
+@{
+    ViewData["Title"] = "Accounts";
+}
+<h2>Accounts</h2>
+<div class="mb-3">
+    <a class="btn btn-primary" asp-controller="AdminAccounts" asp-action="Create">Create New</a>
+    <a class="btn btn-outline-secondary" asp-controller="AdminDepartments" asp-action="Index">Manage Departments</a>
+    <a class="btn btn-outline-secondary" asp-controller="AdminRoles" asp-action="Index">Manage Roles</a>
+    </div>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Delete Flag</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.AccountId</td>
+                <td>@a.Username</td>
+                <td>@a.FullName</td>
+                <td>@a.Email</td>
+                <td>@a.Phone</td>
+                <td>@a.Role?.RoleName (@a.RoleId)</td>
+                <td>@a.Department?.DepartmentName (@a.DepartmentId)</td>
+                <td>@(a.DeleteFlag == true ? "Yes" : "No")</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="AdminAccounts" asp-action="Edit" asp-route-id="@a.AccountId">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    </table>
+
+
