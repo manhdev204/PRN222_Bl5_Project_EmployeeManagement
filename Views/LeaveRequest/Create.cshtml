@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Submit Leave Request";
+}
+<div class="container mt-4">
+    <h3>Submit Leave Request</h3>
+    @if (TempData["Success"] != null)
+    {
+                <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (ViewBag.Error != null)
+    {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+    <form method="post" asp-action="Create" asp-controller="LeaveRequest">
+        @Html.AntiForgeryToken()
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">From Date</label>
+                <input type="date" name="startDate" class="form-control" value="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">To Date</label>
+                <input type="date" name="endDate" class="form-control" value="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-12">
+                <label class="form-label">Reason</label>
+                <textarea name="leaveReason" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary" type="submit">Submit</button>
+                <a class="btn btn-outline-secondary" asp-action="MyRequests" asp-controller="LeaveRequest">My Requests</a>
+            </div>
+        </div>
+    </form>
+</div>

@@ -6,118 +6,118 @@
     var isLogged = ctx?.Session.GetInt32("AUTH_USER_ID").HasValue ?? false;
     var roleStr = ctx?.Session.GetString("AUTH_ROLE");
     int.TryParse(roleStr, out var roleId);
-    var isManager = roleId == 1 || roleId == 2; // Admin hoặc Manager
-    var isEmployee = roleId == 3;
+    var isManager = roleId == 2 || roleId == 3; // Admin or Manager
+    var isEmployee = roleId == 1;
 }
 
 <div class="container py-5">
 
     @if (!isLogged)
     {
-            <!-- Guest hero -->
-            <div class="p-5 mb-4 bg-light rounded-3 border">
-                <div class="container-fluid py-5">
-                    <h1 class="display-5 fw-semibold mb-2">Employee Management System</h1>
-                    <p class="col-md-8 fs-5 text-muted">
-                        Quản lý chấm công và xin nghỉ phép. Đăng nhập để bắt đầu.
-                    </p>
-                    <div class="d-flex gap-2">
-                        <a class="btn btn-primary btn-lg" asp-controller="Authentication" asp-action="Login">
-                            Đăng nhập
-                        </a>
-                        <a class="btn btn-outline-primary btn-lg" asp-controller="Authentication" asp-action="Register">
-                            Đăng ký
-                        </a>
+                <!-- Guest hero -->
+                <div class="p-5 mb-4 bg-light rounded-3 border">
+                    <div class="container-fluid py-5">
+                        <h1 class="display-5 fw-semibold mb-2">Employee Management System</h1>
+                        <p class="col-md-8 fs-5 text-muted">
+                            Manage attendance and leave requests. Log in to get started.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-primary btn-lg" asp-controller="Authentication" asp-action="Login">
+                                Login
+                            </a>
+                            <a class="btn btn-outline-primary btn-lg" asp-controller="Authentication" asp-action="Register">
+                                Register
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Chấm công nhanh</h5>
-                            <p class="card-text text-muted">Theo dõi giờ vào/ra, tự tính tiến độ giờ làm trong ngày.</p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Quick Attendance</h5>
+                                <p class="card-text text-muted">Track check-in/out times, auto calculate daily progress.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Leave Requests</h5>
+                                <p class="card-text text-muted">Submit requests, track approval status, integrated with team calendar.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Reports</h5>
+                                <p class="card-text text-muted">Summarize attendance, lateness, paid/unpaid leave for payroll.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Xin nghỉ phép</h5>
-                            <p class="card-text text-muted">Gửi yêu cầu, theo dõi trạng thái duyệt, tích hợp với lịch đội nhóm.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Báo cáo</h5>
-                            <p class="card-text text-muted">Tổng hợp đi làm, đi muộn, nghỉ có/không lương cho kỳ lương.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
     }
     else
     {
-            <!-- Đã đăng nhập nhưng bạn vẫn ghé Home: hiện lối tắt phù hợp -->
-            <div class="alert alert-success mb-4">
-                Chào mừng trở lại.
-            </div>
+                <!-- Logged in but still on Home: show shortcuts -->
+                <div class="alert alert-success mb-4">
+                    Welcome back.
+                </div>
 
-            <div class="row g-3">
+                <div class="row g-3">
             @if (isManager)
             {
-                        <div class="col-md-6">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-1">Bảng điều khiển quản lý</h5>
-                                        <div class="text-muted">Xem chấm công theo ngày của đội</div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-1">Manager Dashboard</h5>
+                                                <div class="text-muted">View team attendance by day</div>
+                                            </div>
+                                            <a class="btn btn-primary" asp-controller="ManagerHome" asp-action="Index">Open</a>
+                                        </div>
                                     </div>
-                                    <a class="btn btn-primary" asp-controller="ManagerHome" asp-action="Index">Mở</a>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-1">Duyệt nghỉ phép</h5>
-                                        <div class="text-muted">Danh sách yêu cầu pending</div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-1">Approve Leave</h5>
+                                                <div class="text-muted">List of pending requests</div>
+                                            </div>
+                                            <a class="btn btn-outline-primary"
+                                               asp-controller="LeaveRequest" asp-action="ApproveList" asp-route-status="pending">Open</a>
+                                        </div>
                                     </div>
-                                    <a class="btn btn-outline-primary"
-                                       asp-controller="LeaveRequest" asp-action="ApproveList" asp-route-status="pending">Mở</a>
                                 </div>
-                            </div>
-                        </div>
             }
             @if (isEmployee)
             {
-                        <div class="col-md-6">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-1">Chấm công hôm nay</h5>
-                                        <div class="text-muted">Check-in/Check-out và xem tiến độ</div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-1">Today's Attendance</h5>
+                                                <div class="text-muted">Check-in/Check-out and progress</div>
+                                            </div>
+                                            <a class="btn btn-primary" asp-controller="Attendance" asp-action="Index">Open</a>
+                                        </div>
                                     </div>
-                                    <a class="btn btn-primary" asp-controller="Attendance" asp-action="Index">Mở</a>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-1">Xin nghỉ phép</h5>
-                                        <div class="text-muted">Tạo mới và xem trạng thái</div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-1">Leave Requests</h5>
+                                                <div class="text-muted">Create new and view status</div>
+                                            </div>
+                                            <a class="btn btn-outline-primary" asp-controller="LeaveRequest" asp-action="Create">Open</a>
+                                        </div>
                                     </div>
-                                    <a class="btn btn-outline-primary" asp-controller="LeaveRequest" asp-action="Create">Mở</a>
                                 </div>
-                            </div>
-                        </div>
             }
-            </div>
+                </div>
     }
 </div>

@@ -1,4 +1,4 @@
-﻿@using System.Globalization
+﻿using System.Globalization
 @model PRN222_BL5_Project_EmployeeManagement.Models.Attendance
 @{
     // Get working date from record (or today if Model is null)
