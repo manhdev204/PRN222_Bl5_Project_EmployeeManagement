@@ -1,0 +1,134 @@
+@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.LeaveRequest>
+@{
+    ViewData["Title"] = "Leave Requests";
+}
+<h2>Leave Requests</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form method="get" class="row g-3 mb-3 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label">Search: Username</label>
+        <input class="form-control" type="text" name="username" value="@ViewBag.Username" placeholder="Username" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Search: Full name</label>
+        <input class="form-control" type="text" name="fullName" value="@ViewBag.FullName" placeholder="Full name" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: From Date</label>
+        <input class="form-control" type="date" name="fromDate" value="@ViewBag.FromDate" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: To Date</label>
+        <input class="form-control" type="date" name="toDate" value="@ViewBag.ToDate" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: Status</label>
+        <select class="form-select" name="status">
+            <option value="">All Statuses</option>
+            <option value="1" selected="@(ViewBag.Status == 1)">Pending</option>
+            <option value="2" selected="@(ViewBag.Status == 2)">Approved</option>
+            <option value="3" selected="@(ViewBag.Status == 3)">Rejected</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: Department</label>
+        <select class="form-select" name="departmentId">
+            <option value="">All Departments</option>
+            @foreach (var d in (IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Department>)ViewBag.Departments)
+            {
+                var selected = (int?)ViewBag.SelectedDepartmentId == d.DepartmentId;
+                <option value="@d.DepartmentId" selected="@selected">@d.DepartmentName (@d.DepartmentId)</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Order by</label>
+        <select class="form-select" name="sortField">
+            <option value="start_date" selected="@((string)ViewBag.SortField=="start_date")">Start Date</option>
+            <option value="username" selected="@((string)ViewBag.SortField=="username")">Username</option>
+            <option value="full_name" selected="@((string)ViewBag.SortField=="full_name")">Full Name</option>
+            <option value="end_date" selected="@((string)ViewBag.SortField=="end_date")">End Date</option>
+            <option value="status" selected="@((string)ViewBag.SortField=="status")">Status</option>
+            <option value="created_date" selected="@((string)ViewBag.SortField=="created_date")">Created Date</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Direction</label>
+        <select class="form-select" name="sortDir">
+            <option value="asc" selected="@((string)ViewBag.SortDir=="asc")">Asc</option>
+            <option value="desc" selected="@((string)ViewBag.SortDir=="desc")">Desc</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-grid">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+    </div>
+</form>
+<div class="mb-3">
+    <a class="btn btn-secondary" asp-controller="AdminAccounts" asp-action="Index">Back</a>
+</div>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Department</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Leave Reason</th>
+            <th>Status</th>
+            <th>Delete Flag</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var l in Model)
+        {
+            <tr>
+                <td>@l.LeaveRequestId</td>
+                <td>@l.Account?.Username</td>
+                <td>@l.Account?.FullName</td>
+                <td>@l.Account?.Department?.DepartmentName</td>
+                <td>@l.StartDate.ToString("yyyy-MM-dd")</td>
+                <td>@l.EndDate.ToString("yyyy-MM-dd")</td>
+                <td>@l.LeaveReason</td>
+                <td>
+                    @(l.Status switch
+                    {
+                        1 => "Pending",
+                        2 => "Approved",
+                        3 => "Rejected",
+                        _ => l.Status.ToString()
+                    })
+                </td>
+                <td>@(l.DeleteFlag == true ? "Yes" : "No")</td>
+                <td>
+                    @if (l.Status == 1)
+                    {
+                        <a class="btn btn-sm btn-outline-primary" asp-controller="AdminLeaveRequest" asp-action="Edit" asp-route-id="@l.LeaveRequestId">Edit</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Cannot Edit</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
