@@ -14,10 +14,30 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             _db = db;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? q, string? sortField, string? sortDir)
         {
-            var departments = _db.Departments.OrderBy(d => d.DepartmentId).ToList();
-            return View(departments);
+            var query = _db.Departments.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var like = q.Trim();
+                query = query.Where(d => d.DepartmentName != null && d.DepartmentName.Contains(like));
+            }
+
+            var field = (sortField ?? "department_id").ToLowerInvariant();
+            var dir = (sortDir ?? "asc").ToLowerInvariant();
+            bool desc = dir == "desc";
+
+            query = field switch
+            {
+                "created_date" => (desc ? query.OrderByDescending(d => d.CreatedDate) : query.OrderBy(d => d.CreatedDate)),
+                "updated_date" => (desc ? query.OrderByDescending(d => d.LastUpdatedDate) : query.OrderBy(d => d.LastUpdatedDate)),
+                _ => (desc ? query.OrderByDescending(d => d.DepartmentId) : query.OrderBy(d => d.DepartmentId))
+            };
+
+            ViewBag.Query = q;
+            ViewBag.SortField = field;
+            ViewBag.SortDir = dir;
+            return View(query.ToList());
         }
 
         [HttpGet]

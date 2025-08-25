@@ -14,10 +14,30 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             _db = db;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? q, string? sortField, string? sortDir)
         {
-            var roles = _db.Roles.OrderBy(r => r.RoleId).ToList();
-            return View(roles);
+            var query = _db.Roles.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var like = q.Trim();
+                query = query.Where(r => r.RoleName != null && r.RoleName.Contains(like));
+            }
+
+            var field = (sortField ?? "role_id").ToLowerInvariant();
+            var dir = (sortDir ?? "asc").ToLowerInvariant();
+            bool desc = dir == "desc";
+
+            query = field switch
+            {
+                "created_date" => (desc ? query.OrderByDescending(r => r.CreatedDate) : query.OrderBy(r => r.CreatedDate)),
+                "updated_date" => (desc ? query.OrderByDescending(r => r.LastUpdatedDate) : query.OrderBy(r => r.LastUpdatedDate)),
+                _ => (desc ? query.OrderByDescending(r => r.RoleId) : query.OrderBy(r => r.RoleId))
+            };
+
+            ViewBag.Query = q;
+            ViewBag.SortField = field;
+            ViewBag.SortDir = dir;
+            return View(query.ToList());
         }
 
         [HttpGet]
