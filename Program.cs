@@ -10,6 +10,13 @@ builder.Services.AddScoped(typeof(Prn222Bl5ProjectEmployeeManagementContext));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.IdleTimeout = TimeSpan.FromHours(2);
+});
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -26,6 +33,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
