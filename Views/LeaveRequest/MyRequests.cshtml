@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.LeaveRequest>
 @{
-    ViewData["Title"] = "Đơn của tôi";
+    ViewData["Title"] = "My leave requests";
     Func<int, string> statusText = s => s == 1 ? "Pending" : s == 2 ? "Approved" : "Rejected";
     Func<int, string> statusBadge = s => s == 1 ? "bg-warning text-dark" : s == 2 ? "bg-success" : "bg-danger";
 }
