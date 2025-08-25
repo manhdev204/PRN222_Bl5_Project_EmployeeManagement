@@ -1,0 +1,99 @@
+@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Attendance>
+@{
+    ViewData["Title"] = "Attendance";
+}
+<h2>Attendance</h2>
+<form method="get" class="row g-3 mb-3 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label">Search: Username</label>
+        <input class="form-control" type="text" name="username" value="@ViewBag.Username" placeholder="Username" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Search: Full name</label>
+        <input class="form-control" type="text" name="fullName" value="@ViewBag.FullName" placeholder="Full name" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: From Date</label>
+        <input class="form-control" type="date" name="fromDate" value="@ViewBag.FromDate" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: To Date</label>
+        <input class="form-control" type="date" name="toDate" value="@ViewBag.ToDate" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: Status</label>
+        <input class="form-control" type="text" name="status" value="@ViewBag.Status" placeholder="Status" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: Department</label>
+        <select class="form-select" name="departmentId">
+            <option value="">All Departments</option>
+            @foreach (var d in (IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Department>)ViewBag.Departments)
+            {
+                var selected = (int?)ViewBag.SelectedDepartmentId == d.DepartmentId;
+                <option value="@d.DepartmentId" selected="@selected">@d.DepartmentName (@d.DepartmentId)</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Order by</label>
+        <select class="form-select" name="sortField">
+            <option value="attendance_date" selected="@((string)ViewBag.SortField=="attendance_date")">Attendance Date</option>
+            <option value="username" selected="@((string)ViewBag.SortField=="username")">Username</option>
+            <option value="full_name" selected="@((string)ViewBag.SortField=="full_name")">Full Name</option>
+            <option value="check_in" selected="@((string)ViewBag.SortField=="check_in")">Check In</option>
+            <option value="check_out" selected="@((string)ViewBag.SortField=="check_out")">Check Out</option>
+            <option value="created_date" selected="@((string)ViewBag.SortField=="created_date")">Created Date</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Direction</label>
+        <select class="form-select" name="sortDir">
+            <option value="asc" selected="@((string)ViewBag.SortDir=="asc")">Asc</option>
+            <option value="desc" selected="@((string)ViewBag.SortDir=="desc")">Desc</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-grid">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+    </div>
+</form>
+<div class="mb-3">
+    <a class="btn btn-secondary" asp-controller="AdminAccounts" asp-action="Index">Back</a>
+</div>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Department</th>
+            <th>Date</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Status</th>
+            <th>On Leave</th>
+            <th>Delete Flag</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.AttendanceId</td>
+                <td>@a.Account?.Username</td>
+                <td>@a.Account?.FullName</td>
+                <td>@a.Account?.Department?.DepartmentName</td>
+                <td>@a.AttendanceDate.ToString("yyyy-MM-dd")</td>
+                <td>@(a.CheckInTime?.ToString("HH:mm") ?? "-")</td>
+                <td>@(a.CheckOutTime?.ToString("HH:mm") ?? "-")</td>
+                <td>@a.Status</td>
+                <td>@(a.OnLeave == 1 ? "Yes" : "No")</td>
+                <td>@(a.DeleteFlag == true ? "Yes" : "No")</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="AdminAttendance" asp-action="Edit" asp-route-id="@a.AttendanceId">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
