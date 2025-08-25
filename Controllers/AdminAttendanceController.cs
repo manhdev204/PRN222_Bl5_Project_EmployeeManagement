@@ -77,39 +77,5 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             var attendances = query.ToList();
             return View(attendances);
         }
-
-        [HttpGet]
-        public IActionResult Edit(int id)
-        {
-            var attendance = _db.Attendances
-                .Include(a => a.Account)
-                .FirstOrDefault(a => a.AttendanceId == id);
-            if (attendance == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Accounts = _db.Accounts.Where(a => a.DeleteFlag != true).OrderBy(a => a.Username).ToList();
-            return View(attendance);
-        }
-
-        [HttpPost]
-        public IActionResult Edit(int id, DateOnly attendanceDate, DateTime? checkInTime, DateTime? checkOutTime, int status, int onLeave, bool? deleteFlag)
-        {
-            var attendance = _db.Attendances.FirstOrDefault(a => a.AttendanceId == id);
-            if (attendance == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            attendance.AttendanceDate = attendanceDate;
-            attendance.CheckInTime = checkInTime;
-            attendance.CheckOutTime = checkOutTime;
-            attendance.Status = status;
-            attendance.OnLeave = onLeave;
-            attendance.DeleteFlag = deleteFlag ?? false;
-            attendance.LastUpdatedDate = DateTime.UtcNow;
-            _db.SaveChanges();
-            return RedirectToAction("Index");
-        }
     }
 }

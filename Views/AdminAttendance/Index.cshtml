@@ -73,7 +73,6 @@
             <th>Status</th>
             <th>On Leave</th>
             <th>Delete Flag</th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -90,9 +89,6 @@
                 <td>@a.Status</td>
                 <td>@(a.OnLeave == 1 ? "Yes" : "No")</td>
                 <td>@(a.DeleteFlag == true ? "Yes" : "No")</td>
-                <td>
-                    <a class="btn btn-sm btn-outline-primary" asp-controller="AdminAttendance" asp-action="Edit" asp-route-id="@a.AttendanceId">Edit</a>
-                </td>
             </tr>
         }
     </tbody>
