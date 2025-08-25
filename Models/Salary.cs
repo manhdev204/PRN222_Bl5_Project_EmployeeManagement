@@ -25,5 +25,7 @@ public partial class Salary
 
     public bool? DeleteFlag { get; set; }
 
+    public decimal? Deduction { get; set; }
+
     public virtual Account Account { get; set; } = null!;
 }

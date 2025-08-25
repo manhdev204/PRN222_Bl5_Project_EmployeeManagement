@@ -103,7 +103,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             var defaultRoleId = _db.Roles.OrderBy(r => r.RoleId).Select(r => r.RoleId).FirstOrDefault();
             if (defaultRoleId == 0)
             {
-                defaultRoleId = 1;
+                defaultRoleId = 3;
             }
 
             var account = new Account
