@@ -1,0 +1,57 @@
+@model PRN222_BL5_Project_EmployeeManagement.Models.Account
+@{
+    ViewData["Title"] = "Create Account";
+    var roles = ViewBag.Roles as IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Role>;
+    var departments = ViewBag.Departments as IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Department>;
+}
+<h2>Create Account</h2>
+<form method="post" asp-action="Create" asp-controller="AdminAccounts">
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input class="form-control" asp-for="Username" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password (default 123456 if empty)</label>
+        <input class="form-control" type="password" name="plainPassword" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input class="form-control" asp-for="FullName" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control" asp-for="Email" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Phone</label>
+        <input class="form-control" asp-for="Phone" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select class="form-select" asp-for="RoleId">
+            @foreach (var r in roles!)
+            {
+                <option value="@r.RoleId">@r.RoleName (@r.RoleId)</option>
+            }
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Department</label>
+        <select class="form-select" asp-for="DepartmentId">
+            <option value="">-- None --</option>
+            @foreach (var d in departments!)
+            {
+                <option value="@d.DepartmentId">@d.DepartmentName (@d.DepartmentId)</option>
+            }
+        </select>
+    </div>
+    <div class="mb-3 form-check">
+        <input class="form-check-input" type="checkbox" name="DeleteFlag" value="true" @(Model?.DeleteFlag == true ? "checked" : "") />
+        <label class="form-check-label">Delete Flag</label>
+    </div>
+    <div class="text-danger">@ViewBag.Error</div>
+    <button class="btn btn-primary" type="submit">Create</button>
+    <a class="btn btn-secondary" asp-action="Index" asp-controller="AdminAccounts">Back</a>
+</form>
+
+

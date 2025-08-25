@@ -1,5 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var isLoggedIn = HttpContextAccessor.HttpContext?.Session?.GetInt32("AUTH_USER_ID").HasValue == true;
+    var roleStr = HttpContextAccessor.HttpContext?.Session?.GetString("AUTH_ROLE");
+    int.TryParse(roleStr, out var roleId);
+    var isManager = roleId == 1 || roleId == 2;
+    var isEmployee = roleId == 3;
+}
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,44 +15,62 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PRN222_BL5_Project_EmployeeManagement.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Authentication" asp-action="Login">PRN222_BL5_Project_EmployeeManagement</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">PRN222_BL5_Project_EmployeeManagement</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        
-@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
-@{
-    var isLoggedIn = HttpContextAccessor.HttpContext?.Session?.GetInt32("AUTH_USER_ID").HasValue == true;
-}
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        @if (isLoggedIn && isManager)
+                        {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ManagerHome" asp-action="Index">Trang chủ</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ManagerAttendance" asp-action="Today">Điểm danh nhân viên</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="LeaveRequest" asp-action="ApproveList" asp-route-status="pending">Đơn xin nghỉ phép</a>
+                                </li>
+                        }
+                        else if (isLoggedIn && isEmployee)
+                        {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Attendance" asp-action="Index">Attendance Today</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="LeaveRequest" asp-action="Create">Create Leave</a>
+                                </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
                         @if (!isLoggedIn)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="Login">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="ForgotPassword">Forgot Password</a>
-                            </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Authentication" asp-action="Login">Login</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Authentication" asp-action="Register">Register</a>
+                                </li>
                         }
                         else
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Authentication" asp-action="ChangePassword">Change Password</a>
-                            </li>
-                            <li class="nav-item">
-                                <form class="d-inline" method="post" asp-controller="Authentication" asp-action="Logout">
-                                    <button type="submit" class="btn btn-link nav-link text-dark">Logout</button>
-                                </form>
-                            </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Authentication" asp-action="ChangePassword">Change Password</a>
+                                </li>
+                                <li class="nav-item">
+                                    <form class="d-inline" method="post" asp-controller="Authentication" asp-action="Logout">
+                                    @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-link nav-link text-dark">Logout</button>
+                                    </form>
+                                </li>
                         }
-                        
                     </ul>
                 </div>
             </div>
@@ -55,7 +81,6 @@
             @RenderBody()
         </main>
     </div>
-
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2025 - PRN222_BL5_Project_EmployeeManagement
