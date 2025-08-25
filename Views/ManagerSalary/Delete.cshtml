@@ -1,0 +1,20 @@
+﻿@model PRN222_BL5_Project_EmployeeManagement.Models.Salary
+@{
+    ViewData["Title"] = "Delete Salary";
+}
+
+<h2>Delete Salary</h2>
+
+<div>
+    <h4>Are you sure you want to delete this salary record?</h4>
+    <p><strong>Employee:</strong> @Model.Account.FullName</p>
+    <p><strong>Base Salary:</strong> @Model.BaseSalary</p>
+    <p><strong>Bonus:</strong> @Model.Bonus</p>
+    <p><strong>Total Salary:</strong> @Model.TotalSalary</p>
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="SalaryId" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

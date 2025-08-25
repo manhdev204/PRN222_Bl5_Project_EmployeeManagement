@@ -1,0 +1,40 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Salary Management";
+}
+
+<h2>Salary Management</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create Salary</a>
+</p>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Base Salary</th>
+            <th>Bonus</th>
+            <th>Total Salary</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Account.FullName</td>
+                <td>@item.BaseSalary</td>
+                <td>@item.Bonus</td>
+                <td>@item.TotalSalary</td>
+                <td>@item.CreatedDate?.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.SalaryId" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.SalaryId" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

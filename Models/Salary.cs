@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
 
 namespace PRN222_BL5_Project_EmployeeManagement.Models;
@@ -25,5 +26,6 @@ public partial class Salary
 
     public bool? DeleteFlag { get; set; }
 
+    [ValidateNever]
     public virtual Account Account { get; set; } = null!;
 }
