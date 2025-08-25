@@ -63,6 +63,12 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             HttpContext.Session.SetInt32(SessionKeyUserId, user.AccountId);
             HttpContext.Session.SetString(SessionKeyUsername, user.Username);
             HttpContext.Session.SetString(SessionKeyRole, user.RoleId.ToString());
+
+            if (user.RoleId == 1)
+            {
+                return RedirectToAction("Index", "AdminAccounts");
+            }
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -102,7 +108,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             var defaultRoleId = _db.Roles.OrderBy(r => r.RoleId).Select(r => r.RoleId).FirstOrDefault();
             if (defaultRoleId == 0)
             {
-                defaultRoleId = 1;
+                defaultRoleId = 3;
             }
 
             var account = new Account
