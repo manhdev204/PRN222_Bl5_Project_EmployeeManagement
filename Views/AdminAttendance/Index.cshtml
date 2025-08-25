@@ -1,8 +1,8 @@
-@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Account>
+@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Attendance>
 @{
-    ViewData["Title"] = "Accounts";
+    ViewData["Title"] = "Attendance";
 }
-<h2>Accounts</h2>
+<h2>Attendance</h2>
 <form method="get" class="row g-3 mb-3 align-items-end">
     <div class="col-md-3">
         <label class="form-label">Search: Username</label>
@@ -13,12 +13,16 @@
         <input class="form-control" type="text" name="fullName" value="@ViewBag.FullName" placeholder="Full name" />
     </div>
     <div class="col-md-3">
-        <label class="form-label">Search: Email</label>
-        <input class="form-control" type="text" name="email" value="@ViewBag.Email" placeholder="Email" />
+        <label class="form-label">Filter: From Date</label>
+        <input class="form-control" type="date" name="fromDate" value="@ViewBag.FromDate" />
     </div>
     <div class="col-md-3">
-        <label class="form-label">Search: Phone</label>
-        <input class="form-control" type="text" name="phone" value="@ViewBag.Phone" placeholder="Phone" />
+        <label class="form-label">Filter: To Date</label>
+        <input class="form-control" type="date" name="toDate" value="@ViewBag.ToDate" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Filter: Status</label>
+        <input class="form-control" type="text" name="status" value="@ViewBag.Status" placeholder="Status" />
     </div>
     <div class="col-md-3">
         <label class="form-label">Filter: Department</label>
@@ -31,24 +35,15 @@
             }
         </select>
     </div>
-    <div class="col-md-3">
-        <label class="form-label">Filter: Role</label>
-        <select class="form-select" name="roleId">
-            <option value="">All Roles</option>
-            @foreach (var r in (IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Role>)ViewBag.Roles)
-            {
-                var selected = (int?)ViewBag.SelectedRoleId == r.RoleId;
-                <option value="@r.RoleId" selected="@selected">@r.RoleName (@r.RoleId)</option>
-            }
-        </select>
-    </div>
     <div class="col-md-2">
         <label class="form-label">Order by</label>
         <select class="form-select" name="sortField">
-            <option value="account_id" selected="@((string)ViewBag.SortField=="account_id")">Account ID</option>
+            <option value="attendance_date" selected="@((string)ViewBag.SortField=="attendance_date")">Attendance Date</option>
             <option value="username" selected="@((string)ViewBag.SortField=="username")">Username</option>
+            <option value="full_name" selected="@((string)ViewBag.SortField=="full_name")">Full Name</option>
+            <option value="check_in" selected="@((string)ViewBag.SortField=="check_in")">Check In</option>
+            <option value="check_out" selected="@((string)ViewBag.SortField=="check_out")">Check Out</option>
             <option value="created_date" selected="@((string)ViewBag.SortField=="created_date")">Created Date</option>
-            <option value="last_updated_date" selected="@((string)ViewBag.SortField=="last_updated_date")">Last Updated</option>
         </select>
     </div>
     <div class="col-md-2">
@@ -63,22 +58,20 @@
     </div>
 </form>
 <div class="mb-3">
-    <a class="btn btn-primary" asp-controller="AdminAccounts" asp-action="Create">Create New</a>
-    <a class="btn btn-outline-secondary" asp-controller="AdminDepartments" asp-action="Index">Manage Departments</a>
-    <a class="btn btn-outline-secondary" asp-controller="AdminRoles" asp-action="Index">Manage Roles</a>
-    <a class="btn btn-outline-secondary" asp-controller="AdminAttendance" asp-action="Index">Manage Attendance</a>
-    <a class="btn btn-outline-secondary" asp-controller="AdminLeaveRequest" asp-action="Index">Manage Leave Requests</a>
-    </div>
+    <a class="btn btn-secondary" asp-controller="AdminAccounts" asp-action="Index">Back</a>
+</div>
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>ID</th>
             <th>Username</th>
             <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Role</th>
             <th>Department</th>
+            <th>Date</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Status</th>
+            <th>On Leave</th>
             <th>Delete Flag</th>
             <th></th>
         </tr>
@@ -87,20 +80,20 @@
         @foreach (var a in Model)
         {
             <tr>
-                <td>@a.AccountId</td>
-                <td>@a.Username</td>
-                <td>@a.FullName</td>
-                <td>@a.Email</td>
-                <td>@a.Phone</td>
-                <td>@a.Role?.RoleName (@a.RoleId)</td>
-                <td>@a.Department?.DepartmentName (@a.DepartmentId)</td>
+                <td>@a.AttendanceId</td>
+                <td>@a.Account?.Username</td>
+                <td>@a.Account?.FullName</td>
+                <td>@a.Account?.Department?.DepartmentName</td>
+                <td>@a.AttendanceDate.ToString("yyyy-MM-dd")</td>
+                <td>@(a.CheckInTime?.ToString("HH:mm") ?? "-")</td>
+                <td>@(a.CheckOutTime?.ToString("HH:mm") ?? "-")</td>
+                <td>@a.Status</td>
+                <td>@(a.OnLeave == 1 ? "Yes" : "No")</td>
                 <td>@(a.DeleteFlag == true ? "Yes" : "No")</td>
                 <td>
-                    <a class="btn btn-sm btn-outline-primary" asp-controller="AdminAccounts" asp-action="Edit" asp-route-id="@a.AccountId">Edit</a>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="AdminAttendance" asp-action="Edit" asp-route-id="@a.AttendanceId">Edit</a>
                 </td>
             </tr>
         }
     </tbody>
-    </table>
-
-
+</table>

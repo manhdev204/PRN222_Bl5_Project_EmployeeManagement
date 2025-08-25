@@ -1,0 +1,58 @@
+@model PRN222_BL5_Project_EmployeeManagement.Models.LeaveRequest
+@{
+    ViewData["Title"] = "Edit Leave Request";
+    var isPending = Model.Status == 1;
+}
+<h2>Edit Leave Request</h2>
+
+@if (!isPending)
+{
+    <div class="alert alert-warning">
+        <strong>Note:</strong> This leave request is already @(Model.Status == 2 ? "Approved" : "Rejected") and cannot be edited.
+    </div>
+}
+
+<form method="post" asp-action="Edit" asp-controller="AdminLeaveRequest">
+    <input type="hidden" name="id" value="@Model.LeaveRequestId" />
+    <div class="mb-3">
+        <label class="form-label">Account</label>
+        <input class="form-control" value="@Model.Account?.Username - @Model.Account?.FullName" disabled />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Start Date</label>
+        <input class="form-control" type="date" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" @(isPending ? "" : "disabled") />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">End Date</label>
+        <input class="form-control" type="date" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" @(isPending ? "" : "disabled") />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Leave Reason</label>
+        <textarea class="form-control" name="leaveReason" rows="3" @(isPending ? "" : "disabled")>@Model.LeaveReason</textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Status</label>
+        @if (isPending)
+        {
+            <select class="form-select" name="status">
+                <option value="1" selected="@(Model.Status == 1)">Pending</option>
+                <option value="2" selected="@(Model.Status == 2)">Approved</option>
+                <option value="3" selected="@(Model.Status == 3)">Rejected</option>
+            </select>
+        }
+        else
+        {
+            <input class="form-control" value="@(Model.Status switch { 1 => "Pending", 2 => "Approved", 3 => "Rejected", _ => Model.Status.ToString() })" disabled />
+        }
+    </div>
+    <div class="mb-3 form-check">
+        <input class="form-check-input" type="checkbox" name="deleteFlag" @(Model.DeleteFlag == true ? "checked" : "") @(isPending ? "" : "disabled") />
+        <label class="form-check-label">Delete Flag</label>
+    </div>
+    
+    @if (isPending)
+    {
+        <button class="btn btn-primary" type="submit">Save</button>
+    }
+    <a class="btn btn-secondary" asp-action="Index" asp-controller="AdminLeaveRequest">Back</a>
+</form>

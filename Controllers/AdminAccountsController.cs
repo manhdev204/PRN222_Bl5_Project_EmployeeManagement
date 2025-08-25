@@ -3,11 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using PRN222_BL5_Project_EmployeeManagement.Models;
 using System.Security.Cryptography;
 using System.Text;
-using PRN222_BL5_Project_EmployeeManagement.Filters;
 
 namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 {
-    [AdminOnly]
     public class AdminAccountsController : Controller
     {
         private readonly Prn222Bl5ProjectEmployeeManagementContext _db;
@@ -25,7 +23,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             return Convert.ToHexString(hash);
         }
 
-        [HttpGet("/AdminAccounts")]
+        [HttpGet]
         public IActionResult Index(string? username, string? fullName, string? email, string? phone, int? departmentId, int? roleId, string? sortField, string? sortDir)
         {
             var query = _db.Accounts
@@ -89,7 +87,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             return View(accounts);
         }
 
-        [HttpGet("/AdminAccounts/Create")]
+        [HttpGet]
         public IActionResult Create()
         {
             ViewBag.Roles = _db.Roles.OrderBy(r => r.RoleName).ToList();
@@ -97,7 +95,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             return View();
         }
 
-        [HttpPost("/AdminAccounts/Create")]
+        [HttpPost]
         public IActionResult Create(Account model, string? plainPassword)
         {
             if (string.IsNullOrWhiteSpace(model.Username))
@@ -123,7 +121,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet("/AdminAccounts/Edit/{id}")]
+        [HttpGet]
         public IActionResult Edit(int id)
         {
             var account = _db.Accounts.FirstOrDefault(a => a.AccountId == id);
@@ -136,7 +134,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             return View(account);
         }
 
-        [HttpPost("/AdminAccounts/Edit")]
+        [HttpPost]
         public IActionResult Edit(int id, int roleId, int? departmentId, bool? deleteFlag)
         {
             var account = _db.Accounts.FirstOrDefault(a => a.AccountId == id);

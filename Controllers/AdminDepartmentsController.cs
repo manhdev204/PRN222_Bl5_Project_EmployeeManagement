@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PRN222_BL5_Project_EmployeeManagement.Models;
-using PRN222_BL5_Project_EmployeeManagement.Filters;
 
 namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 {
-    [AdminOnly]
     public class AdminDepartmentsController : Controller
     {
         private readonly Prn222Bl5ProjectEmployeeManagementContext _db;
