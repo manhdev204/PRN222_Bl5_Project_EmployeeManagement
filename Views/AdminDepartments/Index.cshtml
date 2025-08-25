@@ -1,0 +1,58 @@
+@model IEnumerable<PRN222_BL5_Project_EmployeeManagement.Models.Department>
+@{
+    ViewData["Title"] = "Departments";
+}
+<h2>Departments</h2>
+<form method="get" class="row g-3 mb-3 align-items-end">
+    <div class="col-md-6">
+        <label class="form-label">Search: Department name</label>
+        <input class="form-control" type="text" name="q" value="@ViewBag.Query" placeholder="Search department name" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Order by</label>
+        <select class="form-select" name="sortField">
+            <option value="department_id" selected="@((string)ViewBag.SortField=="department_id")">Department ID</option>
+            <option value="created_date" selected="@((string)ViewBag.SortField=="created_date")">Created Date</option>
+            <option value="updated_date" selected="@((string)ViewBag.SortField=="updated_date")">Updated Date</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Direction</label>
+        <select class="form-select" name="sortDir">
+            <option value="asc" selected="@((string)ViewBag.SortDir=="asc")">Asc</option>
+            <option value="desc" selected="@((string)ViewBag.SortDir=="desc")">Desc</option>
+        </select>
+    </div>
+    <div class="col-md-1 d-grid">
+        <button class="btn btn-outline-primary" type="submit">Apply</button>
+    </div>
+</form>
+<div class="mb-3">
+    <a class="btn btn-primary" asp-controller="AdminDepartments" asp-action="Create">Create New</a>
+    <a class="btn btn-secondary" asp-controller="AdminAccounts" asp-action="Index">Back</a>
+    </div>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Delete Flag</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.DepartmentId</td>
+                <td>@d.DepartmentName</td>
+                <td>@(d.DeleteFlag == true ? "Yes" : "No")</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="AdminDepartments" asp-action="Edit" asp-route-id="@d.DepartmentId">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    </table>
+
+
