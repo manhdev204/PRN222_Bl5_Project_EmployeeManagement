@@ -63,7 +63,6 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             HttpContext.Session.SetInt32(SessionKeyUserId, user.AccountId);
             HttpContext.Session.SetString(SessionKeyUsername, user.Username);
             HttpContext.Session.SetString(SessionKeyRole, user.RoleId.ToString());
-
             return RedirectToAction("Index", "Home");
         }
 

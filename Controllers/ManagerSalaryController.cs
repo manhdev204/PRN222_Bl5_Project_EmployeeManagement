@@ -47,9 +47,14 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                var userId = HttpContext.Session.GetInt32("AUTH_USER_ID");  
+                if (!userId.HasValue)
+                {
+                    return RedirectToAction("Login", "Authentication");
+                }
                 salary.TotalSalary = salary.BaseSalary + (salary.Bonus ?? 0) - (salary.Deduction ?? 0);
                 salary.CreatedDate = DateTime.Now;
-                salary.CreatedId = 1; // TODO: Lấy từ user đăng nhập (manager)
+                salary.CreatedId = userId.Value; 
                 salary.Account = _context.Accounts.First(a => a.AccountId == salary.AccountId);
                  
                 _context.Salaries.Add(salary);
@@ -79,6 +84,11 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                var userId = HttpContext.Session.GetInt32("AUTH_USER_ID"); // lấy từ session
+                if (!userId.HasValue)
+                {
+                    return RedirectToAction("Login", "Authentication");
+                }
                 var existing = _context.Salaries.Find(salary.SalaryId);
                 if (existing == null) return NotFound();
                 existing.BaseSalary = salary.BaseSalary;
@@ -86,7 +96,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
                 existing.Deduction = salary.Deduction;
                 existing.TotalSalary = salary.BaseSalary + (salary.Bonus ?? 0) - (salary.Deduction ?? 0);
                 existing.LastUpdatedDate = DateTime.Now;
-                existing.LastUpdatedId = 1; // TODO: lấy từ manager login
+                existing.LastUpdatedId = userId.Value;
 
                 _context.Update(existing);
                 _context.SaveChanges();
