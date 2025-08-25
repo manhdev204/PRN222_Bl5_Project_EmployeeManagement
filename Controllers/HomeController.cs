@@ -8,9 +8,9 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 		private const string SessionKeyUserId = "AUTH_USER_ID";
 		private const string SessionKeyRole = "AUTH_ROLE";
 
-		private const int ROLE_ADMIN = 1;
+		private const int ROLE_ADMIN = 3;
 		private const int ROLE_MANAGER = 2;
-		private const int ROLE_EMPLOYEE = 3;
+		private const int ROLE_EMPLOYEE = 1;
 
 		public IActionResult Index()
 		{

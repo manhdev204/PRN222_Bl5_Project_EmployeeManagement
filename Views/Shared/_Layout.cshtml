@@ -3,8 +3,8 @@
     var isLoggedIn = HttpContextAccessor.HttpContext?.Session?.GetInt32("AUTH_USER_ID").HasValue == true;
     var roleStr = HttpContextAccessor.HttpContext?.Session?.GetString("AUTH_ROLE");
     int.TryParse(roleStr, out var roleId);
-    var isManager = roleId == 1 || roleId == 2;
-    var isEmployee = roleId == 3;
+    var isManager = roleId == 2 || roleId == 3;
+    var isEmployee = roleId == 1;
 }
 <!DOCTYPE html>
 <html lang="vi">

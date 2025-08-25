@@ -11,7 +11,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Filters
         {
             var httpContext = context.HttpContext;
             var role = httpContext.Session.GetString(SessionKeyRole);
-            if (string.IsNullOrEmpty(role) || role != "1")
+            if (string.IsNullOrEmpty(role) || role != "3")
             {
                 context.Result = new RedirectToActionResult("Login", "Authentication", null);
             }
