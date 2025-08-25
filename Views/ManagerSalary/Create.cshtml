@@ -1,0 +1,49 @@
+﻿@model PRN222_BL5_Project_EmployeeManagement.Models.Salary
+@{
+    ViewData["Title"] = "Create Salary";
+}
+
+<h2>Create Salary</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label>Employee</label>
+        @if (ViewBag.Accounts != null && ((SelectList)ViewBag.Accounts).Any())
+        {
+            <select asp-for="AccountId" class="form-control"
+                    asp-items="@ViewBag.Accounts">
+            </select>
+        }
+        else
+        {
+            <p class="text-danger">⚠️ Không có nhân viên nào để tạo lương. Vui lòng thêm Employee trước.</p>
+        }
+    </div>
+    <div class="form-group">
+        <label>Base Salary</label>
+        <input asp-for="BaseSalary" class="form-control" />
+        <span asp-validation-for="BaseSalary" class="text-danger"></span>
+
+            
+    </div>
+    <div class="form-group">
+        <label>Bonus</label>
+        <input asp-for="Bonus" class="form-control" />
+        <span asp-validation-for="Bonus" class="text-danger"></span>
+
+    </div>
+    <div class="form-group">
+        <label>Deduction</label>
+        <input asp-for="Deduction" class="form-control" />
+        <span asp-validation-for="Deduction" class="text-danger"></span>
+
+    </div>
+    <button type="submit" class="btn btn-success">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
