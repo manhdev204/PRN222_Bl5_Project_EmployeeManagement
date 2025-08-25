@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Employee Homepage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <!-- Tiêu đề -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-primary">Employee Homepage</h1>
+        <p class="text-muted">Welcome to your portal. Manage your attendance, leave requests, and salary with ease.</p>
+    </div>
+
+    <!-- Navbar đẹp cho Employee -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary rounded shadow mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">👨‍💼 Employee Portal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#employeeNavbar"
+                    aria-controls="employeeNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="employeeNavbar">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-white fw-semibold" asp-controller="Attendance" asp-action="Index">
+                            <i class="bi bi-calendar-check"></i> Manage Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-white fw-semibold" asp-controller="LeaveRequest" asp-action="Index">
+                            <i class="bi bi-envelope-paper"></i> Manage Leave Request
+                        </a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-white fw-semibold" asp-controller="Salary" asp-action="Index">
+                            <i class="bi bi-cash-coin"></i> View Salary
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Các card minh họa -->
+    <div class="row text-center">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow h-100 border-0">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check display-4 text-success"></i>
+                    <h5 class="card-title mt-3">Manage Attendance</h5>
+                    <p class="card-text text-muted">Check-in/Check-out.</p>
+                    <a asp-controller="Attendance" asp-action="Index" class="btn btn-outline-success">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow h-100 border-0">
+                <div class="card-body">
+                    <i class="bi bi-envelope-paper display-4 text-warning"></i>
+                    <h5 class="card-title mt-3">Manage Leave Request</h5>
+                    <p class="card-text text-muted">Submit and track your leave request.</p>
+                    <a asp-controller="LeaveRequest" asp-action="Index" class="btn btn-outline-warning">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow h-100 border-0">
+                <div class="card-body">
+                    <i class="bi bi-cash-coin display-4 text-primary"></i>
+                    <h5 class="card-title mt-3">View Salary</h5>
+                    <p class="card-text text-muted">Check your salary details.</p>
+                    <a asp-controller="EmployeeSalary" asp-action="Index" class="btn btn-outline-primary">Go</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
