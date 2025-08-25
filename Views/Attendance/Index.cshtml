@@ -1,0 +1,288 @@
+﻿@using System.Globalization
+@model PRN222_BL5_Project_EmployeeManagement.Models.Attendance
+@{
+    // Lấy ngày làm theo bản ghi (hoặc hôm nay nếu Model null)
+    var workingDate = Model != null
+        ? Model.AttendanceDate.ToDateTime(TimeOnly.MinValue)
+        : DateTime.Today;
+
+    // Cấu hình nhanh
+    var workStart = new DateTime(workingDate.Year, workingDate.Month, workingDate.Day, 9, 0, 0); // giờ vào chuẩn 09:00
+    var targetHours = 8; // số giờ mục tiêu/ca
+    var now = DateTime.Now;
+
+    bool hasIn = Model?.CheckInTime != null;
+    bool hasOut = Model?.CheckOutTime != null;
+
+    TimeSpan worked = TimeSpan.Zero;
+    if (hasIn)
+    {
+        var end = hasOut ? Model!.CheckOutTime!.Value : now;
+        if (end > Model!.CheckInTime!.Value) worked = end - Model!.CheckInTime!.Value;
+    }
+    double progress = Math.Min(100, Math.Max(0, worked.TotalHours / targetHours * 100.0));
+
+    int status = Model?.Status ?? 0; // 0: nghỉ, 1: đi làm, 2: đi muộn
+    string statusText = Model == null ? "Chưa chấm công" :
+                        status == 1 ? "Đi làm" :
+                        status == 2 ? "Đi muộn" : "Nghỉ";
+    string statusBadge = Model == null ? "bg-secondary" :
+                         status == 1 ? "bg-success" :
+                         status == 2 ? "bg-warning text-dark" : "bg-secondary";
+
+    bool onLeave = (Model?.OnLeave ?? 0) == 1; // OnLeave là INT 0/1
+}
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+    }
+
+    <div class="card shadow border-0 rounded-3">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">Chấm công hôm nay</h3>
+                        <small class="opacity-75">
+                        @workingDate.ToString("dddd, dd/MM/yyyy", new CultureInfo("vi-VN"))
+                        </small>                
+                    </div>
+                <span class="badge @statusBadge fs-6 px-3 py-2">
+                    <i class="bi bi-activity me-1"></i>@statusText
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            @if (onLeave)
+            {
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="bi bi-calendar2-check me-2 fs-5"></i>
+                        Hôm nay bạn đang trong kỳ nghỉ đã duyệt. Check-in/Check-out tạm khóa.
+                    </div>
+            }
+
+            @if (Model == null)
+            {
+                    <div class="alert alert-warning text-center mb-4">
+                        <i class="bi bi-hourglass-split me-2"></i>Bạn chưa chấm công hôm nay.
+                    </div>
+            }
+
+            <div class="row g-3">
+                <!-- Đồng hồ + thông tin nhanh -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="text-muted">Giờ hệ thống</div>
+                                    <h4 id="liveClock" class="mb-0">@now.ToString("HH:mm:ss")</h4>
+                                </div>
+                                <div class="text-end">
+                                    <div class="text-muted">Giờ vào chuẩn</div>
+                                    <div class="fw-semibold">@workStart.ToString("HH:mm")</div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row text-center">
+                                <div class="col">
+                                    <div class="text-muted">Check-in</div>
+                                    <div class="fs-5 fw-semibold">
+                                        @(hasIn ? Model!.CheckInTime!.Value.ToString("HH:mm") : "--:--")
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="text-muted">Check-out</div>
+                                    <div class="fs-5 fw-semibold">
+                                        @(hasOut ? Model!.CheckOutTime!.Value.ToString("HH:mm") : "--:--")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tiến độ giờ làm -->
+                <div class="col-md-5">
+                    <div class="card h-100 border-0 bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="text-muted">Tiến độ giờ làm hôm nay</div>
+                                <div id="progressSummary" class="small">
+                                    <span class="fw-semibold">@worked.Hours</span>h
+                                    <span class="fw-semibold">@worked.Minutes</span>m /
+                                    <span class="fw-semibold">@targetHours</span>h
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 12px;">
+                                <div id="progressBar" class="progress-bar" role="progressbar" style="width: @progress.ToString("0")%"></div>
+                            </div>
+                            @if (hasIn && !hasOut)
+                            {
+                                    <div class="small text-muted mt-2">
+                                        Đang tính theo thời gian thực từ @Model!.CheckInTime!.Value.ToString("HH:mm").
+                                    </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hành động -->
+                <div class="col-md-3">
+                    <div class="card h-100 border-0 bg-light">
+                        <div class="card-body d-flex flex-column justify-content-center gap-2">
+                            <form asp-action="CheckIn" method="post" class="d-grid">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="btn btn-success btn-lg"
+                                        title="Ghi nhận giờ vào"
+                                @(hasIn || onLeave ? "disabled" : "")
+                                        onclick="return confirm('Xác nhận check-in ngay bây giờ?');">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Check-in
+                                </button>
+                            </form>
+                            <form asp-action="CheckOut" method="post" class="d-grid">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="btn btn-danger btn-lg"
+                                        title="Ghi nhận giờ ra"
+                                @((!hasIn || hasOut || onLeave) ? "disabled" : "")
+                                        onclick="return confirm('Xác nhận check-out và kết thúc ca hôm nay?');">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Check-out
+                                </button>
+                            </form>
+                            <a asp-controller="Attendance" asp-action="MyHistory" class="btn btn-outline-secondary">
+                                <i class="bi bi-clock-history me-1"></i> Lịch sử của tôi
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="mt-4">
+                <div class="card border-0">
+                    <div class="card-header bg-white">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-timeline fs-5"></i>
+                            <span class="fw-semibold">Timeline hôm nay</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex align-items-center">
+                                <i class="bi bi-dot fs-3 me-2 text-success"></i>
+                                <div>
+                                    <div class="fw-semibold">Check-in</div>
+                                    <div class="text-muted small">
+                                        @(hasIn ? Model!.CheckInTime!.Value.ToString("HH:mm:ss dd/MM") : "Chưa thực hiện")
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center">
+                                <i class="bi bi-dot fs-3 me-2 text-danger"></i>
+                                <div>
+                                    <div class="fw-semibold">Check-out</div>
+                                    <div class="text-muted small">
+                                        @(hasOut ? Model!.CheckOutTime!.Value.ToString("HH:mm:ss dd/MM") : "Chưa thực hiện")
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center">
+                                <i class="bi bi-dot fs-3 me-2 text-primary"></i>
+                                <div>
+                                    <div class="fw-semibold">Trạng thái</div>
+                                    <div class="text-muted small">
+                                        @statusText
+                                        @if (Model != null && status == 2 && hasIn)
+                                        {
+                                            var lateMinutes = (int)Math.Max(0, (Model!.CheckInTime!.Value - workStart).TotalMinutes);
+                                            if (lateMinutes > 0)
+                                            {
+                                                        <span class="ms-2 badge bg-warning text-dark">Muộn @lateMinutes phút</span>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="small text-muted">
+                Quy ước: đi muộn nếu check-in sau @workStart.ToString("HH:mm"). Mục tiêu @targetHours giờ/ca.
+            </div>
+            <div>
+                <a asp-controller="LeaveRequest" asp-action="Create" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-plus me-1"></i> Gửi yêu cầu nghỉ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    (function () {
+        const clockEl = document.getElementById('liveClock');
+        const progressSummary = document.getElementById('progressSummary');
+        const progressBar = document.getElementById('progressBar');
+
+        const hasIn = @((hasIn && !hasOut).ToString().ToLower());
+        const targetHours = @targetHours;
+
+        // Tạo Date JS từ CheckInTime (nếu có)
+        @if (hasIn && !hasOut)
+        {
+            var ci = Model!.CheckInTime!.Value;
+            <text>
+                const checkIn = new Date(@ci.Year, @ci.Month - 1, @ci.Day, @ci.Hour, @ci.Minute, @ci.Second);
+            </text>
+        }
+        else
+        {
+            <text>const checkIn = null;</text>
+        }
+
+        function tick() {
+            const now = new Date();
+            if (clockEl) clockEl.textContent = now.toLocaleTimeString('vi-VN');
+
+            if (hasIn && checkIn) {
+                const ms = now - checkIn;
+                if (ms > 0) {
+                    const totalMinutes = Math.floor(ms / 60000);
+                    const h = Math.floor(totalMinutes / 60);
+                    const m = totalMinutes % 60;
+
+                    if (progressSummary)
+                        progressSummary.innerHTML = `<span class="fw-semibold">${h}</span>h <span class="fw-semibold">${m}</span>m / <span class="fw-semibold">${targetHours}</span>h`;
+
+                    if (progressBar) {
+                        const pct = Math.min(100, Math.max(0, (h + m/60) / targetHours * 100));
+                        progressBar.style.width = pct.toFixed(0) + '%';
+                    }
+                }
+            }
+        }
+        tick();
+        setInterval(tick, 1000);
+    })();
+    </script>
+}

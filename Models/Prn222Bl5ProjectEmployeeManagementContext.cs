@@ -34,11 +34,11 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
     {
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Account__46A222CDACAEF877");
+            entity.HasKey(e => e.AccountId).HasName("PK__Account__46A222CD259D7B66");
 
             entity.ToTable("Account");
 
-            entity.HasIndex(e => e.Username, "UQ__Account__F3DBC5727CF2CF88").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Account__F3DBC572B8DFDAD8").IsUnique();
 
             entity.Property(e => e.AccountId).HasColumnName("account_id");
             entity.Property(e => e.CreatedDate)
@@ -87,7 +87,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Attendance>(entity =>
         {
-            entity.HasKey(e => e.AttendanceId).HasName("PK__Attendan__20D6A968FEB43379");
+            entity.HasKey(e => e.AttendanceId).HasName("PK__Attendan__20D6A968D47893D9");
 
             entity.ToTable("Attendance");
 
@@ -122,7 +122,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Department>(entity =>
         {
-            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__C2232422CF5D28EB");
+            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__C22324225697A474");
 
             entity.ToTable("Department");
 
@@ -146,7 +146,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<LeaveRequest>(entity =>
         {
-            entity.HasKey(e => e.LeaveRequestId).HasName("PK__Leave_Re__F42B99E8A7F2F001");
+            entity.HasKey(e => e.LeaveRequestId).HasName("PK__Leave_Re__F42B99E83260BF6C");
 
             entity.ToTable("Leave_Request");
 
@@ -179,7 +179,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CC97C23745");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CCE84C7003");
 
             entity.ToTable("Role");
 
@@ -203,7 +203,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Salary>(entity =>
         {
-            entity.HasKey(e => e.SalaryId).HasName("PK__Salary__A3C71C51DAA9AB9E");
+            entity.HasKey(e => e.SalaryId).HasName("PK__Salary__A3C71C51FEB8A029");
 
             entity.ToTable("Salary");
 

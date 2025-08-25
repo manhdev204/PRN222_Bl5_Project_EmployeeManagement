@@ -1,0 +1,141 @@
+﻿@model PRN222_BL5_Project_EmployeeManagement.Models.ViewModels.ManagerAttendanceVm
+@using System.Globalization
+@{
+	var vi = new CultureInfo("vi-VN");
+	string dateStrUrl = Model.Date.ToString("yyyy-MM-dd");
+	string dateLabel = vi.TextInfo.ToTitleCase(Model.Date.ToDateTime(TimeOnly.MinValue)
+		.ToString("dddd, dd/MM/yyyy", vi));
+	string currentDept = Model.DepartmentId?.ToString() ?? "";
+}
+
+<div class="container mt-4">
+	@if (TempData["Success"] != null)
+	{
+			<div class="alert alert-success alert-dismissible fade show">
+				<i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+				<button class="btn-close" data-bs-dismiss="alert"></button>
+			</div>
+	}
+	@if (TempData["Error"] != null)
+	{
+			<div class="alert alert-danger alert-dismissible fade show">
+				<i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+				<button class="btn-close" data-bs-dismiss="alert"></button>
+			</div>
+	}
+
+	<div class="card shadow border-0 rounded-3">
+		<div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+			<div>
+				<h3 class="mb-0">Bảng điều khiển chấm công (theo ngày)</h3>
+				<small class="opacity-75">@dateLabel</small>
+			</div>
+			<div class="d-flex gap-2">
+				<span class="badge bg-success">Đi làm: @Model.PresentCount</span>
+				<span class="badge bg-warning text-dark">Đi muộn: @Model.LateCount</span>
+				<span class="badge bg-info text-dark">Nghỉ phép: @Model.OnLeaveCount</span>
+				<span class="badge bg-secondary">Chưa check-in: @Model.AbsentCount</span>
+			</div>
+		</div>
+		<div class="card-body">
+			<form method="get" class="row g-2 mb-3">
+				<div class="col-md-3">
+					<label class="form-label">Ngày</label>
+					<input name="date" type="date" class="form-control" value="@dateStrUrl" />
+				</div>
+				<div class="col-md-3">
+					<label class="form-label">Phòng ban</label>
+						<select name="departmentId" class="form-select">
+						<option value="">Tất cả</option>
+						@foreach (var d in Model.Departments)
+						{
+				<option value="@d.id"
+						selected="@(currentDept == d.id.ToString() ? "selected" : null)">
+								@d.name
+				</option>
+						}
+</select>
+
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Tìm kiếm</label>
+					<input name="q" class="form-control" placeholder="Tên/username/email" value="@Model.Search" />
+				</div>
+				<div class="col-md-2 d-flex align-items-end">
+					<button type="submit" class="btn btn-primary w-100">
+						<i class="bi bi-funnel me-1"></i>Lọc
+					</button>
+				</div>
+			</form>
+
+			<div class="table-responsive">
+				<table class="table table-hover align-middle">
+					<thead class="table-light">
+						<tr>
+							<th>#</th>
+							<th>Nhân viên</th>
+							<th>Phòng ban</th>
+							<th>Check-in</th>
+							<th>Check-out</th>
+							<th>Trạng thái</th>
+							<th class="text-end">Hành động</th>
+						</tr>
+					</thead>
+					<tbody>
+						@if (!Model.Rows.Any())
+						{
+							<tr><td colspan="7" class="text-center text-muted">Không có dữ liệu.</td></tr>
+						}
+						else
+						{
+							var idx = 0;
+							foreach (var r in Model.Rows.OrderBy(x => x.DepartmentName).ThenBy(x => x.FullName))
+							{
+								idx++;
+									<tr>
+										<td>@idx</td>
+										<td>@r.FullName</td>
+										<td>@r.DepartmentName</td>
+										<td>@(r.CheckIn?.ToString("HH:mm") ?? "--:--")</td>
+										<td>@(r.CheckOut?.ToString("HH:mm") ?? "--:--")</td>
+										<td>
+											<span class="badge @r.StatusBadge">@r.StatusText</span>
+										@if (r.OnLeave)
+										{
+													<span class="ms-1 badge bg-light text-dark">on_leave</span>
+										}
+										</td>
+										<td class="text-end">
+										@* Quick action: chỉ cho đánh dấu vắng khi chưa có check-in và không on_leave *@
+											<div class="btn-group">
+												<form asp-action="MarkAbsent" asp-controller="ManagerAttendance" method="post">
+												@Html.AntiForgeryToken()
+													<input type="hidden" name="accountId" value="@r.AccountId" />
+													<input type="hidden" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" />
+													<input type="hidden" name="excused" value="true" />
+													<button type="submit" class="btn btn-outline-info btn-sm"
+															title="Đánh dấu vắng có lý do" @(r.CheckIn != null || r.OnLeave ? "disabled" : "")>
+														<i class="bi bi-journal-check me-1"></i>Có lý do
+													</button>
+												</form>
+												<form asp-action="MarkAbsent" asp-controller="ManagerAttendance" method="post" class="ms-1">
+												@Html.AntiForgeryToken()
+													<input type="hidden" name="accountId" value="@r.AccountId" />
+													<input type="hidden" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" />
+													<input type="hidden" name="excused" value="false" />
+													<button type="submit" class="btn btn-outline-secondary btn-sm"
+															title="Đánh dấu vắng không lý do" @(r.CheckIn != null || r.OnLeave ? "disabled" : "")>
+														<i class="bi bi-journal-x me-1"></i>Không lý do
+													</button>
+												</form>
+											</div>
+										</td>
+									</tr>
+							}
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

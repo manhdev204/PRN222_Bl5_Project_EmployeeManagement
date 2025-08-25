@@ -1,32 +1,35 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using PRN222_BL5_Project_EmployeeManagement.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 {
-    public class HomeController : Controller
-    {
-        private readonly ILogger<HomeController> _logger;
+	public class HomeController : Controller
+	{
+		private const string SessionKeyUserId = "AUTH_USER_ID";
+		private const string SessionKeyRole = "AUTH_ROLE";
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
+		private const int ROLE_ADMIN = 1;
+		private const int ROLE_MANAGER = 2;
+		private const int ROLE_EMPLOYEE = 3;
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+		public IActionResult Index()
+		{
+			var uid = HttpContext.Session.GetInt32(SessionKeyUserId);
+			if (!uid.HasValue) return View();
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+			var roleStr = HttpContext.Session.GetString(SessionKeyRole);
+			int.TryParse(roleStr, out var roleId);
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-    }
+            if (roleId == ROLE_ADMIN)
+                return RedirectToAction("Index", "AdminAccounts");
+
+            if (roleId == ROLE_MANAGER)
+				return RedirectToAction("Index", "ManagerHome");
+
+			if (roleId == ROLE_EMPLOYEE)
+				return RedirectToAction("Index", "EmployeeHome");
+
+			return View();
+		}
+	}
 }
