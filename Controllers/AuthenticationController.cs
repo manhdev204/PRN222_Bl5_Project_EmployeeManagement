@@ -64,7 +64,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             HttpContext.Session.SetString(SessionKeyUsername, user.Username);
             HttpContext.Session.SetString(SessionKeyRole, user.RoleId.ToString());
 
-            if (user.RoleId == 1)
+            if (user.RoleId == 3)
             {
                 return RedirectToAction("Index", "AdminAccounts");
             }
