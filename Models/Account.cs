@@ -35,7 +35,9 @@ public partial class Account
 
     public virtual Department? Department { get; set; }
 
-    public virtual ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
+    public virtual ICollection<LeaveRequest> LeaveRequestAccounts { get; set; } = new List<LeaveRequest>();
+
+    public virtual ICollection<LeaveRequest> LeaveRequestApproveds { get; set; } = new List<LeaveRequest>();
 
     public virtual Role Role { get; set; } = null!;
 
