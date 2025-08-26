@@ -28,18 +28,17 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
     public virtual DbSet<Salary> Salaries { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("server = LAPTOP-KMHGGFJ6\\MAY1; database = PRN222_BL5_Project_EmployeeManagement;uid=sa;pwd=sa;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:MyCnn");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Account__46A222CD497608CD");
+            entity.HasKey(e => e.AccountId).HasName("PK__Account__46A222CD259D7B66");
 
             entity.ToTable("Account");
 
-            entity.HasIndex(e => e.Username, "UQ__Account__F3DBC572D324B0D6").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Account__F3DBC572B8DFDAD8").IsUnique();
 
             entity.Property(e => e.AccountId).HasColumnName("account_id");
             entity.Property(e => e.CreatedDate)
@@ -88,7 +87,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Attendance>(entity =>
         {
-            entity.HasKey(e => e.AttendanceId).HasName("PK__Attendan__20D6A968F9A23A74");
+            entity.HasKey(e => e.AttendanceId).HasName("PK__Attendan__20D6A968D47893D9");
 
             entity.ToTable("Attendance");
 
@@ -123,7 +122,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Department>(entity =>
         {
-            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__C223242204B8CB65");
+            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__C22324225697A474");
 
             entity.ToTable("Department");
 
@@ -147,7 +146,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<LeaveRequest>(entity =>
         {
-            entity.HasKey(e => e.LeaveRequestId).HasName("PK__Leave_Re__F42B99E8B7627772");
+            entity.HasKey(e => e.LeaveRequestId).HasName("PK__Leave_Re__F42B99E83260BF6C");
 
             entity.ToTable("Leave_Request");
 
@@ -185,7 +184,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CC008DC2DA");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CCE84C7003");
 
             entity.ToTable("Role");
 
@@ -209,7 +208,7 @@ public partial class Prn222Bl5ProjectEmployeeManagementContext : DbContext
 
         modelBuilder.Entity<Salary>(entity =>
         {
-            entity.HasKey(e => e.SalaryId).HasName("PK__Salary__A3C71C5141AA9273");
+            entity.HasKey(e => e.SalaryId).HasName("PK__Salary__A3C71C51FEB8A029");
 
             entity.ToTable("Salary");
 

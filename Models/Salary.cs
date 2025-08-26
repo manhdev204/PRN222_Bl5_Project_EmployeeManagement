@@ -13,8 +13,6 @@ public partial class Salary
 
     public decimal? Bonus { get; set; }
 
-    public decimal? Deduction { get; set; }
-
     public decimal? TotalSalary { get; set; }
 
     public DateTime? CreatedDate { get; set; }
@@ -26,6 +24,8 @@ public partial class Salary
     public int? LastUpdatedId { get; set; }
 
     public bool? DeleteFlag { get; set; }
+
+    public decimal? Deduction { get; set; }
 
     public virtual Account Account { get; set; } = null!;
 }
