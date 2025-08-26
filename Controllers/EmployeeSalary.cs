@@ -14,7 +14,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string sortOrder, string search, DateTime? startDate, DateTime? endDate)
+        public IActionResult Index(string sortOrder, string search, DateTime? startDate, DateTime? endDate, int page = 1, int pageSize = 3)
         {
             var accountId = HttpContext.Session.GetInt32("AUTH_USER_ID");
             if (!accountId.HasValue)
@@ -66,7 +66,14 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
                 _ => salaries.OrderBy(s => s.Account.FullName),
             };
-            return View(salaries.ToList());
+            // Pagination
+            int totalItems = salaries.Count();
+            var items = salaries.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return View(items);
         }
     }
 
