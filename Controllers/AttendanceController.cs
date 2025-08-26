@@ -69,7 +69,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
 			if (IsOnLeaveToday(accountId.Value, today))
 			{
-				TempData["Error"] = "Hôm nay bạn đang trong kỳ nghỉ đã duyệt, không thể check-in.";
+				TempData["Error"] = "You are on an approved leave today and cannot check in.";
 				return RedirectToAction(nameof(Index));
 			}
 
@@ -99,14 +99,14 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
 			if (attendance.OnLeave == 1)
 			{
-				TempData["Error"] = "Bản ghi hôm nay là ngày nghỉ, không thể check-in.";
+				TempData["Error"] = "Today is marked as a leave day. Check-in is not allowed.";
 				return RedirectToAction(nameof(Index));
 			}
 
 			if (attendance.CheckInTime != null)
 			{
-				TempData["Error"] = $"Bạn đã check-in lúc {attendance.CheckInTime:HH:mm}.";
-				return RedirectToAction(nameof(Index));
+                TempData["Error"] = $"You have already checked in at {attendance.CheckInTime:HH:mm}.";
+                return RedirectToAction(nameof(Index));
 			}
 
 			attendance.CheckInTime = now;
@@ -114,8 +114,8 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 			attendance.LastUpdatedDate = now;
 			_context.SaveChanges();
 
-			TempData["Success"] = $"Check-in lúc {now:HH:mm}.";
-			return RedirectToAction(nameof(Index));
+            TempData["Success"] = $"Checked in at {now:HH:mm}.";
+            return RedirectToAction(nameof(Index));
 		}
 
 		[HttpPost]
@@ -133,34 +133,34 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
 			if (attendance == null || attendance.CheckInTime == null)
 			{
-				TempData["Error"] = "Bạn chưa check-in hôm nay.";
-				return RedirectToAction(nameof(Index));
+                TempData["Error"] = "You have not checked in today.";
+                return RedirectToAction(nameof(Index));
 			}
 
 			if (attendance.OnLeave == 1)
 			{
-				TempData["Error"] = "Hôm nay là ngày nghỉ, không thể check-out.";
-				return RedirectToAction(nameof(Index));
+                TempData["Error"] = "Today is a leave day. Check-out is not allowed.";
+                return RedirectToAction(nameof(Index));
 			}
 
 			if (attendance.CheckOutTime != null)
 			{
-				TempData["Error"] = $"Bạn đã check-out lúc {attendance.CheckOutTime:HH:mm}.";
-				return RedirectToAction(nameof(Index));
+                TempData["Error"] = $"You have already checked out at {attendance.CheckOutTime:HH:mm}.";
+                return RedirectToAction(nameof(Index));
 			}
 
 			if (now < attendance.CheckInTime)
 			{
-				TempData["Error"] = "Thời gian check-out không hợp lệ.";
-				return RedirectToAction(nameof(Index));
+                TempData["Error"] = "Invalid check-out time.";
+                return RedirectToAction(nameof(Index));
 			}
 
 			attendance.CheckOutTime = now;
 			attendance.LastUpdatedDate = now;
 			_context.SaveChanges();
 
-			TempData["Success"] = $"Check-out lúc {now:HH:mm}.";
-			return RedirectToAction(nameof(Index));
+            TempData["Success"] = $"Checked out at {now:HH:mm}.";
+            return RedirectToAction(nameof(Index));
 		}
 
 		private bool IsOnLeaveToday(int accountId, DateOnly day)
