@@ -24,12 +24,23 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
 
         public IActionResult Index(string sortOrder, string search, DateTime? startDate, DateTime? endDate)
         {
+            var userId = HttpContext.Session.GetInt32("AUTH_USER_ID");
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login", "Authentication");
+            }
+            var manager = _context.Accounts.Include(a => a.Department).FirstOrDefault(a => a.AccountId == userId.Value);
+
             ViewData["CurrentSort"] = sortOrder;
             ViewData["CurrentSearch"] = search;
             ViewData["StartDate"] = startDate?.ToString("yyyy-MM-dd");
             ViewData["EndDate"] = endDate?.ToString("yyyy-MM-dd");
 
-            var salaries = _context.Salaries.Include(s => s.Account).AsQueryable();
+            var salaries = _context.Salaries
+     .Include(s => s.Account)
+     .Where(s => s.Account.DepartmentId == manager.DepartmentId
+              && (s.DeleteFlag == false || s.DeleteFlag == null))
+     .AsQueryable();
 
             // Filtering
             if (!string.IsNullOrEmpty(search))
@@ -76,9 +87,19 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         // GET: Create
         public IActionResult Create()
         {
+            var userId = HttpContext.Session.GetInt32("AUTH_USER_ID");
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login", "Authentication");
+            }
+            var manager = _context.Accounts.Include(a => a.Department).FirstOrDefault(a => a.AccountId == userId.Value);
 
-            ViewBag.Accounts = new SelectList(_context.Accounts
-                                                        .Where(a => a.RoleId == 1 && (a.DeleteFlag == false || a.DeleteFlag == null))
+            var employeesInDept = _context.Accounts
+                                          .Where(a => a.DepartmentId == manager.DepartmentId && a.RoleId == 1 && (a.DeleteFlag == false || a.DeleteFlag == null))
+                                          .Select(a => a.AccountId)
+                                          .ToList();
+            ViewBag.Accounts = new SelectList(employeesInDept == null ? new List<Account>() : _context.Accounts
+                                                        .Where(a => employeesInDept.Contains(a.AccountId))
                                                         .Select(a => new { a.AccountId, a.FullName })
                                                         .ToList(), "AccountId", "FullName");
             return View();
@@ -91,16 +112,16 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userId = HttpContext.Session.GetInt32("AUTH_USER_ID");  
+                var userId = HttpContext.Session.GetInt32("AUTH_USER_ID");
                 if (!userId.HasValue)
                 {
                     return RedirectToAction("Login", "Authentication");
                 }
                 salary.TotalSalary = salary.BaseSalary + (salary.Bonus ?? 0) - (salary.Deduction ?? 0);
                 salary.CreatedDate = DateTime.Now;
-                salary.CreatedId = userId.Value; 
+                salary.CreatedId = userId.Value;
                 salary.Account = _context.Accounts.First(a => a.AccountId == salary.AccountId);
-                 
+
                 _context.Salaries.Add(salary);
                 _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
