@@ -22,7 +22,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
         // List salary
 
 
-        public IActionResult Index(string sortOrder, string search, DateTime? startDate, DateTime? endDate)
+        public IActionResult Index(string sortOrder, string search, DateTime? startDate, DateTime? endDate, int page = 1, int pageSize = 3)
         {
             var userId = HttpContext.Session.GetInt32("AUTH_USER_ID");
             if (!userId.HasValue)
@@ -37,10 +37,10 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
             ViewData["EndDate"] = endDate?.ToString("yyyy-MM-dd");
 
             var salaries = _context.Salaries
-     .Include(s => s.Account)
-     .Where(s => s.Account.DepartmentId == manager.DepartmentId
-              && (s.DeleteFlag == false || s.DeleteFlag == null))
-     .AsQueryable();
+                .Include(s => s.Account)
+                .Where(s => s.Account.DepartmentId == manager.DepartmentId
+                         && (s.DeleteFlag == false || s.DeleteFlag == null))
+                .AsQueryable();
 
             // Filtering
             if (!string.IsNullOrEmpty(search))
@@ -49,8 +49,7 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
                                             || s.BaseSalary.ToString().Contains(search)
                                             || s.Bonus.ToString().Contains(search)
                                             || s.Deduction.ToString().Contains(search)
-                                            || s.TotalSalary.ToString().Contains(search)
-                                            );
+                                            || s.TotalSalary.ToString().Contains(search));
             }
             if (startDate.HasValue)
                 salaries = salaries.Where(s => s.CreatedDate >= startDate);
@@ -81,9 +80,16 @@ namespace PRN222_BL5_Project_EmployeeManagement.Controllers
                 _ => salaries.OrderBy(s => s.Account.FullName),
             };
 
+            // Pagination
+            int totalItems = salaries.Count();
+            var items = salaries.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return View(salaries.ToList());
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return View(items);
         }
+
         // GET: Create
         public IActionResult Create()
         {
